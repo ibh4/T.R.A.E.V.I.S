@@ -12,6 +12,8 @@
   <img alt="Edge" src="https://img.shields.io/badge/Edge-Raspberry%20Pi-C51A4E?style=for-the-badge">
   <img alt="Robot" src="https://img.shields.io/badge/Embodied-Spider%20Bot-FFB703?style=for-the-badge">
 </p>
+<img width="1380" height="776" alt="image" src="https://github.com/user-attachments/assets/3e708a32-b10b-41ea-a68f-157e6706435a" />
+<img width="1380" height="776" alt="image" src="https://github.com/user-attachments/assets/c5929255-5632-4625-9490-ff3ea1cf1209" />
 
 <p align="center">
   <b>赛道</b>：硬件交互 + 社会公益　|　<b>团队</b>：三个 Agenter　|　<b>阶段</b>：复赛
@@ -32,6 +34,7 @@ TRAE 负责理解上下文与生成高层意图；中台负责状态同步、事
 > **项目目标**：让 AI 承担等待、观察与重复执行，让开发者不再被固定在工位，也让 AI 从屏幕中的软件 Agent 进一步成为能够连接现实世界的个人智能系统。
 
 > **当前仓库定位**：ESP32-S3 圆屏电子吧唧 + T.R.A.E.V.I.S. 统一中台 + 家庭边缘感知节点 + TRAE Bridge + 机器人受控执行闭环。
+<img width="1380" height="776" alt="image" src="https://github.com/user-attachments/assets/68a7a55f-b53c-4592-a15b-2af70db2f760" />
 
 ---
 
@@ -58,6 +61,7 @@ T.R.A.E.V.I.S. 想解决的核心矛盾是：**工作占用了人的持续注意
 3. **AI 被困在屏幕里**：今天的大多数 AI 能力仍然停留在浏览器、IDE 和命令行中。TRAE 能理解任务、调用工具并推进工作，但它没有通往现实世界的感知、交互与行动接口。
 
 T.R.A.E.V.I.S. 用统一中枢连接项目状态、家庭事件和硬件状态，让系统负责持续观察，让人只处理真正重要的变化。
+<img width="1380" height="862" alt="image" src="https://github.com/user-attachments/assets/cf2ead32-c998-4e79-b782-8a1021785087" />
 
 ---
 
