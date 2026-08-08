@@ -1,0 +1,11 @@
+{
+  "commandId": "cmd_fixture_failed_001",
+  "requestId": "req_fixture_failed_001",
+  "target": "trae",
+  "input": "执行失败场景测试",
+  "status": "failed",
+  "requestedAt": "2026-08-02T12:00:00.000Z",
+  "updatedAt": "2026-08-02T12:00:03.000Z",
+  "result": "Mock TRAE 执行失败。",
+  "adapterMode": "mock"
+}

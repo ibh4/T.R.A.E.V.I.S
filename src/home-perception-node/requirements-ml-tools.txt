@@ -1,0 +1,9 @@
+# Install this file only in the Python 3.10 tool venv that inherits
+# llama_finetune system packages. Torch and torchaudio must resolve from the
+# parent Conda environment instead of being downloaded again.
+numpy==1.26.4
+opencv-python==4.11.0.86
+ultralytics==8.4.108
+onnx==1.19.1
+funasr>=1.2,<2
+sounddevice>=0.5,<1

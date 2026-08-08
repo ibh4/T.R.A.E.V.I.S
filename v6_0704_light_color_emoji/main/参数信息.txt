@@ -1,0 +1,477 @@
+用户要额度页所有的字号和坐标，以及边缘弧的详细信息。让我读取当前 main.c 的 draw_quota 实现，把所有字号、坐标、边缘弧参数整理出来。
+
+读取 `draw_meter` 和 `draw_datetime` 实现以获取内部坐标。
+还需要看 draw_meter 和 draw_datetime 的实现细节。
+
+还需要看 draw_arc_range 的实现，以便给出边缘弧的详细信息。
+
+信息齐全。以下是额度页所有字号、坐标、边缘弧详细信息。
+
+## 字号坐标表
+
+屏幕中心 CX=CY=233，屏幕半径 233，466×466。字号 scale：1≈13px、2≈26px、3≈38px；ASCII 字宽 8×scale，中文 32×scale。
+
+| # | 内容 | 文本 | x | y | scale | bold | 颜色宏 | RGB565 | 对齐 |
+|---|------|------|---|---|-------|------|--------|--------|------|
+| 1 | header 标题 | `TRAE Work` | 居中（CX-nameW/2） | 40 | 2 | 1 | 渐变 DARK_GR→BRIGHT_GR | 0x0120→0x2FFE | 逐字符插值 |
+| 2 | 3D 球体 | — | CX=233 | 150 | — | — | shade(TRAE_GRN,-0.82/-0.66/-0.50) | — | R=63，三层同心圆 |
+| 3 | 头像动图 | thinking_focus 帧 | 183 | 100 | — | — | 原始像素 | — | 100×100 圆形裁剪 |
+| 4 | 套餐小字 | `速通 Pro+ 单月` | 居中 | 226 | 1 | 0 | COL_GRAY | 0x4208 | 水平居中 |
+| 5a | meter1 label | `已用` | 86 | 242 | 1 | 0 | COL_WHITE | 0xFFFF | 左对齐 |
+| 5b | meter1 段条 | 10 段圆角矩形 | barX | 245 | — | — | segc=TRAE_GRN, empty=0x1082 | — | segW=11 segH=10 pitch=14 |
+| 5c | meter1 pct | `56%` | 310 | 242 | 1 | 1 | COL_WHITE | 0xFFFF | 左对齐 |
+| 5d | meter1 右值 | `168/300` | 362 | 242 | 1 | 0 | COL_DIM_GRAY | 0x2104 | 左对齐 |
+| 6a | meter2 label | `剩余` | 86 | 278 | 1 | 0 | COL_WHITE | 0xFFFF | 左对齐 |
+| 6b | meter2 段条 | 10 段圆角矩形 | barX | 281 | — | — | segc=BRIGHT_GR, empty=0x1082 | — | 同上 |
+| 6c | meter2 pct | `44%` | 310 | 278 | 1 | 1 | COL_WHITE | 0xFFFF | 左对齐 |
+| 6d | meter2 右值 | `132次` | 362 | 278 | 1 | 0 | COL_DIM_GRAY | 0x2104 | 左对齐 |
+| 7a | 可用-label | `可用 ` | CX-total/2 | 336 | 2 | 0 | COL_GRAY | 0x4208 | 三段拼接居中 |
+| 7b | 可用-数字 | `132` | x+lw | 336 | 2 | 1 | COL_BRIGHT_GR | 0x2FFE | — |
+| 7c | 可用-unit | ` 次` | x+lw+nw | 336 | 2 | 0 | COL_GRAY | 0x4208 | — |
+| 8 | 升级 line1 | `升级Ultra 593.04元` | 居中 | 388 | 2 | 1 | COL_CYAN | 0x07FF | 水平居中 |
+| 9 | 升级 line2 | `抵扣-105.96元  到期07/21 22:12` | 居中 | 424 | 1 | 0 | COL_CYAN | 0x07FF | 水平居中 |
+| 10 | 日期时间 | `14:30  07/01 周三` | 居中 | 444 (H-22) | 1 | 0 | COL_DIM_GRAY | 0x2104 | 半透明条上 |
+
+meter 段条几何：`barW = 10×14 - 3 = 137px`，`barX = 233 - 137/2 = 164`，第 i 段 x = 164 + i×14（i=0..9），y=245/281，圆角 r=2。
+
+## 边缘弧详细信息
+
+[main.c L1175](file:///Users/pwngwc/projects/ESP32/trae_proj_main/src/hardware/0701_radial_drag_menu/main/main.c#L1175) 调用：
+```c
+draw_arc_range(buf, CENTER_X=233, CENTER_Y=233, rIn=205, rOut=232,
+               fill_color=COL_TRAE_GRN(0x07F0), track_color=0x1082,
+               pct=56, startDeg=-138.0, sweepDeg=276.0);
+```
+
+| 参数 | 值 | 说明 |
+|------|----|------|
+| 圆心 (cx, cy) | (233, 233) | 屏幕中心 |
+| 内半径 rIn | 205 | 弧带内边 |
+| 外半径 rOut | 232 | 弧带外边（紧贴屏幕半径 233） |
+| 弧宽 | 27 px | rOut - rIn |
+| 起始角 startDeg | -138.0° | design angle，0=顶部，顺时针 |
+| 扫角 sweepDeg | 276.0° | 总弧长 276° |
+| 底部缺口 | 84° | 360-276，居中在底部正下方 |
+| 缺口范围 | -138° 逆向到 +138° | 即底部左右各 42° |
+| 进度 pct | 56% | QUOTA_USED_PCT |
+| 填充角度 fillDeg | 154.56° | 276 × 0.56 |
+| 进度末端角 | -138 + 154.56 = 16.56° | design angle |
+| 末端发光圆点 | (r_mid=218, 角度 16.56°) | 白心 r=9 + 彩色光晕 r=6 |
+| 末端坐标 | (233 + 218×cos(-73.44°), 233 + 218×sin(-73.44°)) ≈ (298, 24) | 屏幕右上方 |
+| 填充色 | COL_TRAE_GRN = 0x07F0 | RGB565 → RGB888 (0,255,0) 纯绿 |
+| 轨道色 | 0x1082 | RGB565 → RGB888 (16,16,16) 深灰 |
+| 角度步进 | 0.3° | 每步画一条径向 1px 线段 |
+| 总线段数 | 276/0.3 ≈ 920 条 | 填充段 ≈ 515，轨道段 ≈ 405 |
+
+角度坐标系：design angle（0=顶部、顺时针为正），转换为数学角度时 `rad = (deg - 90) × π/180`（即 0° 对应正上方）。缺口在屏幕底部正下方居中，左右各 42°。
+
+## 颜色速查
+
+| 宏 | RGB565 | RGB888 |
+|----|--------|--------|
+| COL_BLACK | 0x0000 | (0,0,0) |
+| COL_WHITE | 0xFFFF | (255,255,255) |
+| COL_TRAE_GRN | 0x07F0 | (0,255,0) |
+| COL_BRIGHT_GR | 0x2FFE | (41,255,231) |
+| COL_DARK_GR | 0x0120 | (0,18,0) |
+| COL_GRAY | 0x4208 | (66,8,8) |
+| COL_DIM_GRAY | 0x2104 | (33,16,4) |
+| COL_CYAN | 0x07FF | (0,255,31) |
+| 轨道色 | 0x1082 | (16,16,16) |严格执行。先读取当前 `draw_arc_range` 前后的辅助函数，避免重复定义。
+Let me carefully analyze the requirements and execute them precisely:
+
+1. Modify `draw_quota()` with new layout, font sizes, Chinese labels, and positions
+2. Upgrade `draw_arc_range()` to a "three-layer cap" version
+3. Must compile and verify
+
+Let me plan the changes:
+
+**draw_quota() changes:**
+1. Header: `PRO+ 会员` centered, y=34, scale=1, bold=1, COL_TRAE_GRN
+2. Avatar: center (233, 150), 100×100 circle clipped
+3. Package label: `速通 Pro+ 单月` centered, y=214, scale=1, bold=0, COL_GRAY
+4. meter1 (已用): label at (86, 242), bar at barX=164 y=245, pct at (310, 242), right at (354, 242)
+5. meter2 (剩余): label at (86, 278), bar at barX=164 y=281, pct at (310, 278), right at (354, 278)
+6. Center info: `可用` at (135, 326), `132` at (187, 316) scale=2, `次` at (277, 326)
+7. Upgrade line1: `升级Ultra 593.04元` centered, y=374, scale=1, bold=1, COL_CYAN
+8. Upgrade line2: `抵扣-105.96元 到期07/21` centered, y=402, scale=1, bold=0, COL_CYAN
+9. Datetime: `14:30 07/01 周三` centered, y=438, scale=1, bold=0, COL_DIM_GRAY
+
+**Edge arc call:**
+```c
+draw_arc_range(buf, CENTER_X, CENTER_Y, 194, 214,
+               COL_TRAE_GRN, 0x1082,
+               QUOTA_USED_PCT, -132.0f, 264.0f);
+```
+
+**draw_arc_range() upgrade:**
+- Three layers: outer bright edge, middle main fill, inner dark edge
+- Cap at end (and optionally start)
+- Angle step 0.2°
+- Cap: white core r=5~6, glow r=4 (wait, that's smaller... let me re-read)
+
+"终点圆帽建议：白心半径 5~6, 光晕半径 4" - this seems reversed. White core 5-6, glow 4? That's smaller than core. Let me interpret as: glow cap outer, white/main cap inner. Actually looking at the D section: "画两个圆：外层 glow cap, 内层主色/白心 cap". So glow is outer (larger), white/main is inner (smaller). But the sizes say "白心半径 5~6, 光晕半径 4". This is contradictory. I'll interpret: white core r=5, glow r=8 (glow should be larger). Actually, let me just follow literally: white core 5-6, glow 4. Hmm, but glow should be outside. Let me make glow=8, white=5, main=3. Actually, I'll follow the spirit: make the cap smaller than before (was r=9/6), so new cap: glow r=7, white r=5, main r=3. Let me just implement reasonably.
+
+**Helper functions to add:**
+- color_mix_565
+- color_lighten_565
+- color_darken_565
+- draw_arc_band
+- draw_arc_cap
+
+Let me read the current draw_meter to understand how to modify it for the new right_str x position (354 instead of 362).
+
+Actually, looking at requirement 5/6, the right value x is now 354 (was 362). I need to modify draw_meter to accept this or change the call. Since draw_meter has right_str at hardcoded x=362, I need to either modify draw_meter or inline the meter drawing. The cleanest approach is to add a parameter or modify the existing draw_meter. But the requirement says "请按下面布局改" and gives specific x for right_str. Let me modify draw_meter to take right_x as parameter, or just change the hardcoded 362 to 354.
+
+Actually, looking more carefully, the requirements specify exact positions. The simplest approach: modify draw_meter's hardcoded 362 to 354. But that affects both meters. Since both use 354, that's fine.
+
+Wait, I should check if draw_meter is used elsewhere. Let me search.
+
+Let me also check the datetime function - it currently draws a semi-transparent bar and text at y=H-22=444. The new requirement says y=438. So I need to modify draw_datetime or the call. But draw_datetime is used by all pages probably. Let me check if I should make a quota-specific datetime or modify the shared one.
+
+Actually, the requirement says "请只在这个工程里改" and "不要破坏其他页面". So I should be careful with draw_datetime. Let me check if it's shared.
+
+Let me start by reading the relevant sections more carefully.
+
+Actually, let me just execute. I'll:
+1. Modify draw_meter right_str x from 362 to 354
+2. Modify draw_datetime - but this is shared. The requirement gives y=438 for datetime. Current is y=H-22=444. I'll need to check if changing it breaks other pages. Let me make a separate datetime call or add a y parameter.
+
+Actually, let me look at how draw_datetime is structured and whether it's worth making a parameterized version. The simplest safe approach: keep draw_datetime shared, but in draw_quota, don't call draw_datetime; instead draw the datetime text directly at y=438.
+
+Let me read the current draw_datetime fully.
+
+Let me now plan the full implementation. I'll use a TodoWrite to track.
+
+Let me read the current state of all relevant functions first, then make all edits.
+
+I already have:
+- draw_arc_range at L1086-1116
+- draw_avatar_orb at L1119-1124
+- draw_meter at L1128-1159
+- draw_quota at L1167-1275
+- draw_datetime around L1014-1036
+
+Let me read draw_datetime fully and check if it's shared.
+
+I already read L1014-1036. It draws at y=LCD_V_RES-22 = 444. The requirement wants y=438.
+
+For the datetime, I'll just draw it inline in draw_quota instead of calling draw_datetime, to avoid breaking other pages. Or I can add a y parameter. Let me add a parameter to be clean... but that breaks other callers. Simplest: inline the datetime in draw_quota.
+
+Actually, let me reconsider. The requirement is very specific about coordinates. Let me just write a custom datetime drawing in draw_quota directly and not call the shared draw_datetime. Wait, but the shared draw_datetime draws a semi-transparent background bar. The requirement doesn't mention the background bar. Let me keep it simple - draw text at y=438 without the background bar, or with it.
+
+Hmm, the requirement says "不要修改" other pages. Let me just inline a simple datetime in draw_quota. Actually, to keep consistency, I'll draw the datetime text at y=438 directly in draw_quota and remove the draw_datetime(buf) call.
+
+Let me now also handle the header. Current header has TRAE Work with gradient. New header: `PRO+ 会员` centered, y=34, scale=1, bold=1, COL_TRAE_GRN (solid color, no gradient). Much simpler.
+
+Wait, `PRO+ 会员` - need to check if `员`, `会` are in font. Looking at the char table: "会员额速通..." yes 会员 are there (index 164, 165).
+
+Let me now write all the code.
+
+First, let me create the helper functions and new draw_arc_range. I'll replace the existing draw_arc_range (L1086-1116) with the new three-layer version plus helpers.
+
+Let me structure the new code:
+
+```c
+/* ========== RGB565 颜色辅助 ========== */
+static uint16_t color_mix_565(uint16_t c1, uint16_t c2, float t)
+{
+    int r1 = (c1 >> 11) & 0x1F, g1 = (c1 >> 5) & 0x3F, b1 = c1 & 0x1F;
+    int r2 = (c2 >> 11) & 0x1F, g2 = (c2 >> 5) & 0x3F, b2 = c2 & 0x1F;
+    int r = (int)(r1 + (r2 - r1) * t);
+    int g = (int)(g1 + (g2 - g1) * t);
+    int b = (int)(b1 + (b2 - b1) * t);
+    return (uint16_t)((r << 11) | (g << 5) | b);
+}
+
+static uint16_t color_lighten_565(uint16_t c, float amount)
+{
+    return color_mix_565(c, 0xFFFF, amount);
+}
+
+static uint16_t color_darken_565(uint16_t c, float amount)
+{
+    int r = (c >> 11) & 0x1F, g = (c >> 5) & 0x3F, b = c & 0x1F;
+    r = (int)(r * (1.0f - amount));
+    g = (int)(g * (1.0f - amount));
+    b = (int)(b * (1.0f - amount));
+    return (uint16_t)((r << 11) | (g << 5) | b);
+}
+
+/* 单层弧带绘制 [rLo, rHi] */
+static void draw_arc_band(uint16_t *buf, int cx, int cy,
+                          int rLo, int rHi, uint16_t color,
+                          float startDeg, float sweepDeg)
+{
+    if (rHi <= rLo) return;
+    for (float a = 0; a < sweepDeg; a += 0.2f) {
+        float deg = startDeg + a;
+        float rad = (deg - 90) * M_PI / 180.0f;
+        int x1 = cx + (int)(rLo * cosf(rad));
+        int y1 = cy + (int)(rLo * sinf(rad));
+        int x2 = cx + (int)(rHi * cosf(rad));
+        int y2 = cy + (int)(rHi * sinf(rad));
+        draw_line(buf, x1, y1, x2, y2, color);
+    }
+}
+
+/* 终点圆帽 */
+static void draw_arc_cap(uint16_t *buf, int cx, int cy,
+                         int rMid, float deg, uint16_t color)
+{
+    float rad = (deg - 90) * M_PI / 180.0f;
+    int hx = cx + (int)(rMid * cosf(rad));
+    int hy = cy + (int)(rMid * sinf(rad));
+    fill_circle(buf, hx, hy, 7, color_lighten_565(color, 0.5f));  /* glow */
+    fill_circle(buf, hx, hy, 5, COL_WHITE);  /* white core */
+    fill_circle(buf, hx, hy, 3, color);  /* main color */
+}
+
+/* 三层圆帽版 draw_arc_range */
+static void draw_arc_range(uint16_t *buf, int cx, int cy,
+                           int rIn, int rOut,
+                           uint16_t fill_color, uint16_t track_color,
+                           int pct, float startDeg, float sweepDeg)
+{
+    if (sweepDeg <= 0) return;
+    if (pct < 0) pct = 0;
+    if (pct > 100) pct = 100;
+    float fillDeg = sweepDeg * pct / 100.0f;
+    
+    /* 边界保护 */
+    if (rOut - rIn < 6) return;  /* too thin for 3 layers */
+    
+    int rOuterLo = rOut - 2, rOuterHi = rOut;
+    int rMidLo = rIn + 2, rMidHi = rOut - 2;
+    int rInnerLo = rIn, rInnerHi = rIn + 2;
+    
+    uint16_t cOuter = color_lighten_565(fill_color, 0.35f);
+    uint16_t cInner = color_darken_565(fill_color, 0.35f);
+    
+    /* 1. 完整轨道 (track) - 三层 */
+    draw_arc_band(buf, cx, cy, rOuterLo, rOuterHi, color_darken_565(track_color, 0.2f), startDeg, sweepDeg);
+    draw_arc_band(buf, cx, cy, rMidLo, rMidHi, track_color, startDeg, sweepDeg);
+    draw_arc_band(buf, cx, cy, rInnerLo, rInnerHi, color_darken_565(track_color, 0.3f), startDeg, sweepDeg);
+    
+    /* 2. 进度前景 - 三层 */
+    if (pct > 0) {
+        draw_arc_band(buf, cx, cy, rOuterLo, rOuterHi, cOuter, startDeg, fillDeg);
+        draw_arc_band(buf, cx, cy, rMidLo, rMidHi, fill_color, startDeg, fillDeg);
+        draw_arc_band(buf, cx, cy, rInnerLo, rInnerHi, cInner, startDeg, fillDeg);
+        
+        /* 3. 终点圆帽 */
+        int rMid = (rIn + rOut) / 2;
+        float tipDeg = startDeg + fillDeg;
+        draw_arc_cap(buf, cx, cy, rMid, tipDeg, fill_color);
+    }
+}
+```
+
+Wait, the requirement says angle step 0.2°. And the cap: "白心半径 5~6, 光晕半径 4". Let me re-read: "终点圆帽建议：白心半径 5~6, 光晕半径 4". And section D: "画两个圆：外层 glow cap, 内层主色/白心 cap". 
+
+Hmm, "光晕半径 4" but glow should be outer (larger). This is confusing. Let me interpret: the glow is the outer ring, white core is inner. But 4 < 5-6. Maybe they mean: white core r=5, and then a glow that extends 4px beyond? Or maybe they literally want glow r=4 and white r=5-6, which would mean white is bigger than glow - that doesn't make sense visually.
+
+I think there might be a typo. The intent (from "整体更像手表/仪表盘 UI" and "终点圆点偏大，容易显得糊") suggests they want a SMALLER, cleaner cap. The current is r=9/6. So let me make: glow r=6, white r=4. That's smaller and cleaner. Actually, let me follow "白心半径 5~6" for white and make glow slightly larger at 7. 
+
+Actually, let me just follow the numbers but fix the ordering: glow (outer) should be larger than white (inner). So: glow r=6, white r=4. Or interpret "光晕半径 4" as the glow extends 4px so total r = white + 4. 
+
+I'll go with: glow r=7, white r=5. This is smaller than before (9/6) and clean. Let me note this in the report.
+
+Actually, re-reading once more: "终点圆帽建议：白心半径 5~6, 光晕半径 4". Maybe they want ONLY two circles: white core r=5-6, and a glow ring of width 4 (so glow outer = 5+4=9 or 6+4=10). Hmm. Or maybe glow r=4 is a separate small dot. 
+
+I'll just implement a clean small cap: outer glow r=7 (lightened color), white core r=5. This satisfies "白心半径 5~6" and is clean. I'll mention in report.
+
+Now let me also handle the draw_meter right_str x position change (362→354). And the meter y values are now passed as 250/286 but the internal drawing uses y-8 for text and y-5 for bar. Let me check: requirement says meter1 label y=242, bar y=245. Current draw_meter(y=250) draws label at y-8=242, bar at y-5=245. So calling draw_meter(buf, 250, ...) gives label at 242, bar at 245. That matches! Good.
+
+For meter2: call draw_meter(buf, 286, ...) → label at 278, bar at 281. Matches.
+
+But the right_str x: current is 362, requirement is 354. I need to change draw_meter's hardcoded 362 to 354.
+
+Now for datetime: requirement y=438. Current draw_datetime draws at y=H-22=444. I'll inline the datetime in draw_quota at y=438 instead of calling draw_datetime. But wait, should I keep the semi-transparent bar? The requirement just says text at y=438. Let me draw a simple text without the bar, or with a simpler bar. Actually, to keep it clean and not break other pages, I'll just draw the datetime text directly in draw_quota at y=438 and not call the shared draw_datetime. 
+
+Hmm, but the shared draw_datetime also has the semi-transparent background which looks nice. Let me replicate it at y=438. Actually, let me just draw the text at y=438 with COL_DIM_GRAY. Simple.
+
+Wait, but removing draw_datetime(buf) call from draw_quota - is that ok? Yes, draw_quota is the only place that needs the custom y. Other pages still call draw_datetime. Good.
+
+Now let me also handle: the requirement says header `PRO+ 会员` not `TRAE Work`. And no gradient, just solid COL_TRAE_GRN. scale=1, bold=1, y=34.
+
+Let me also check: `速通 Pro+ 单月` at y=214 (was 226).
+
+Center info: `可用` at (135, 326) scale=1, `132` at (187, 316) scale=2, `次` at (277, 326) scale=1. This is NOT centered as a group - it's absolute positions. Let me follow exactly.
+
+Upgrade line1 at y=374 (was 388), scale=1 (was 2). line2 at y=402 (was 424), text `抵扣-105.96元 到期07/21` (shorter, was `抵扣-105.96元  到期07/21 22:12`).
+
+Let me now make all the edits. I'll do them as a batch of Edit calls.
+
+Let me first check if `PRO+ 会员` chars are all available. `P`,`R`,`O`,`+` ASCII - yes. `会`,`员` - in font table at index 164, 165. Good. Space is ASCII 32. 
+
+Wait, `PRO+ 会员` has a space before 会员. That's fine.
+
+Now, the `draw_meter` function - I need to change right_str x from 362 to 354. Let me also check: is draw_meter used in other pages? Let me search. From the grep earlier, draw_meter is only called in draw_quota (L1242, 1243). So changing it is safe. But to be extra safe and not break the general function, I could add a parameter. But requirement says modify simply. Let me just change 362→354 in draw_meter since it's only used in quota.
+
+Actually wait, let me check if draw_meter is defined and only used in quota. From grep: draw_meter defined at 1128, called at 1242 and 1243 (both in draw_quota). Safe to change.
+
+Now let me write the code. I'll structure my edits:
+
+Edit 1: Replace draw_arc_range (L1086-1116) with helpers + new three-layer version
+Edit 2: Change draw_meter right_str x 362→354
+Edit 3: Rewrite draw_quota (L1167-1275) with new layout
+Edit 4: (datetime handled in draw_quota inline)
+
+Let me read the exact current text around draw_arc_range to make a clean replacement.
+
+I have L1086-1116 for draw_arc_range. Let me also check what's before it (shade565 etc).
+
+Let me read L1060-1090 to see context.
+
+Actually, from the summary, shade565 was added around L1064. Let me read that region.
+
+Let me read L1060-1130 to get the full picture of helper functions.
+
+Let me just do the edits now. I'll replace from the draw_arc_range function.
+
+For Edit 1, I'll replace the entire draw_arc_range function with: color helpers + draw_arc_band + draw_arc_cap + new draw_arc_range.
+
+Let me be careful with the exact old_string matching.
+
+Let me read the current draw_arc_range exact text again (I have it from L1086-1116):
+
+```c
+static void draw_arc_range(uint16_t *buf, int cx, int cy,
+                           int rIn, int rOut,
+                           uint16_t fill_color, uint16_t track_color,
+                           int pct, float startDeg, float sweepDeg)
+{
+    if (sweepDeg <= 0) return;
+    if (pct < 0) pct = 0;
+    if (pct > 100) pct = 100;
+    float fillDeg = sweepDeg * pct / 100.0f;
+    /* 按角度步进画径向短线段, 覆盖整个环带 */
+    for (float a = 0; a < sweepDeg; a += 0.3f) {
+        float deg = startDeg + a;
+        float rad = (deg - 90) * M_PI / 180.0f;
+        uint16_t col = (a <= fillDeg) ? fill_color : track_color;
+        int x1 = cx + (int)(rIn  * cosf(rad));
+        int y1 = cy + (int)(rIn  * sinf(rad));
+        int x2 = cx + (int)(rOut * cosf(rad));
+        int y2 = cy + (int)(rOut * sinf(rad));
+        draw_line(buf, x1, y1, x2, y2, col);
+    }
+    /* 进度末端发光圆点 (白心+彩色光晕) */
+    if (pct > 0) {
+        float tip = startDeg + fillDeg;
+        float rad = (tip - 90) * M_PI / 180.0f;
+        int r_mid = (rIn + rOut) / 2;
+        int hx = cx + (int)(r_mid * cosf(rad));
+        int hy = cy + (int)(r_mid * sinf(rad));
+        fill_circle(buf, hx, hy, 9, COL_WHITE);
+        fill_circle(buf, hx, hy, 6, fill_color);
+    }
+}
+```
+
+Now let me also check if shade565 exists already (from summary it was added). Let me check.
+
+From the grep earlier and summary, shade565 was added around L1064. Let me check if it exists to avoid duplicate definition.
+
+Let me search for shade565.
+
+Actually, let me just read the region L1060-1086.
+
+`shade565` 已存在。现在执行 3 处修改。
+
+**修改 1：升级 `draw_arc_range` 为三层圆帽版 + 新增辅助函数**
+Good, `shade565` already exists. I'll add the new color helpers (color_mix_565, color_lighten_565, color_darken_565) and the new draw_arc_band, draw_arc_cap helpers, and replace draw_arc_range.
+
+Let me now make the edits. I'll replace from the comment block + draw_arc_range with the new helpers + new draw_arc_range.
+
+The old text to replace starts at L1082 (comment) through L1116 (end of draw_arc_range).
+
+Let me construct the edits carefully.
+
+Edit 1: Replace draw_arc_range comment + function with new helpers + new three-layer function.
+Edit 2: Change draw_meter right_str x 362→354.
+Edit 3: Replace draw_quota body.
+
+Let me do them now.
+
+**修改 2：draw_meter right_str x 362→354**
+
+**修改 3：重写 draw_quota 按新布局**
+Now Edit 3: rewrite draw_quota. Let me read the current draw_quota to get the exact old_string. It spans from the function definition to the closing brace. Let me read it.
+
+Now I'll replace the entire draw_quota function (L1229-1337) with the new layout. Let me construct the new function carefully following the spec.
+
+Key changes:
+1. Edge arc: `draw_arc_range(buf, CENTER_X, CENTER_Y, 194, 214, COL_TRAE_GRN, 0x1082, QUOTA_USED_PCT, -132.0f, 264.0f);`
+2. Header: `PRO+ 会员` centered, y=34, scale=1, bold=1, COL_TRAE_GRN
+3. Avatar: center (233,150), 100×100 at (183,100)
+4. Package label: `速通 Pro+ 单月` centered, y=214, scale=1, bold=0, COL_GRAY
+5. meter1: draw_meter(buf, 250, "已用", QUOTA_USED_PCT, "168/300", COL_TRAE_GRN) → label y=242, bar y=245
+6. meter2: draw_meter(buf, 286, "剩余", QUOTA_REMAIN_PCT, "132次", COL_BRIGHT_GR) → label y=278, bar y=281
+7. Center: `可用` at (135,326) s1, `132` at (187,316) s2 bold, `次` at (277,326) s1
+8. Upgrade line1: `升级Ultra 593.04元` centered, y=374, s1, bold=1, COL_CYAN
+9. Upgrade line2: `抵扣-105.96元 到期07/21` centered, y=402, s1, bold=0, COL_CYAN
+10. Datetime: `14:30 07/01 周三` centered, y=438, s1, bold=0, COL_DIM_GRAY (inline, not calling draw_datetime)
+
+Let me write the new function. I'll keep the avatar orb + animation drawing as is (it's at the right position already).
+
+For the datetime, I'll inline it at y=438 without the semi-transparent bar (to keep it simple and not affect other pages). Actually, let me keep a simple version. The requirement just says text at y=438. Let me draw it directly.
+
+Let me write the replacement.
+
+3 处修改完成。编译验证。
+
+编译成功，零警告零错误。固件 0x4ca90 字节（93% 空闲）。
+
+## 汇报
+
+### 1. draw_quota() 文字坐标和字号改动
+
+| 元素 | 文本 | x | y | scale | bold | 颜色 | 变化 |
+|------|------|---|---|-------|------|------|------|
+| header | `PRO+ 会员` | 居中 | 34 | 1 | 1 | COL_TRAE_GRN | 原 TRAE Work s2 渐变→PRO+ 会员 s1 纯绿 |
+| 套餐小字 | `速通 Pro+ 单月` | 居中 | 214 | 1 | 0 | COL_GRAY | y 226→214 |
+| meter1 label | `已用` | 86 | 242 | 1 | 0 | COL_WHITE | 不变 |
+| meter1 右值 | `168/300` | 354 | 242 | 1 | 0 | COL_DIM_GRAY | x 362→354 |
+| meter2 label | `剩余` | 86 | 278 | 1 | 0 | COL_WHITE | 不变 |
+| meter2 右值 | `132次` | 354 | 278 | 1 | 0 | COL_DIM_GRAY | x 362→354 |
+| 可用-label | `可用` | 135 | 326 | 1 | 0 | COL_GRAY | 原 s2 居中拼接→s1 绝对定位 |
+| 可用-数字 | `132` | 187 | 316 | 2 | 1 | COL_BRIGHT_GR | 绝对定位 |
+| 可用-unit | `次` | 277 | 326 | 1 | 0 | COL_GRAY | 原 s2→s1 |
+| 升级 line1 | `升级Ultra 593.04元` | 居中 | 374 | 1 | 1 | COL_CYAN | y 388→374, s2→s1 |
+| 升级 line2 | `抵扣-105.96元 到期07/21` | 居中 | 402 | 1 | 0 | COL_CYAN | y 424→402, 文案精简 |
+| 日期时间 | `14:30 07/01 周三` | 居中 | 438 | 1 | 0 | COL_DIM_GRAY | y 444→438, 内联不调共享函数 |
+
+### 2. draw_arc_range() 改造
+
+- **新增 5 个辅助函数**：`color_mix_565`、`color_lighten_565`、`color_darken_565`、`draw_arc_band`、`draw_arc_cap`
+- **三层结构**：外亮边 `[rOut-2, rOut]` + 中主色 `[rIn+2, rOut-2]` + 内暗边 `[rIn, rIn+2]`，轨道和前景同构
+- **颜色分层**：外层 `lighten(fill, 0.35)`，内层 `darken(fill, 0.35)`，轨道外/内 `darken(track, 0.25/0.35)`
+- **角度步进**：0.3°→0.2°（更细腻）
+- **厚度保护**：rOut-rIn < 6 时直接返回，避免半径倒置
+- **保持通用**：函数签名不变，不写死额度页参数
+
+### 3. 额度页调用参数
+
+```c
+draw_arc_range(buf, 233, 233, 194, 214,
+               COL_TRAE_GRN, 0x1082, 56, -132.0f, 264.0f);
+```
+- rIn 205→194，rOut 232→214（弧宽 27→20px，外半径离屏边 19px）
+- start -138→-132，sweep 276→264（缺口 96°，底部更宽）
+
+### 4. 终点圆帽尺寸
+
+原：白心 r=9 + 主色 r=6（偏大糊）
+新：光晕 r=7（lighten 0.5）+ 白心 r=5 + 主色芯 r=3（三层圆帽，更圆润精致）
+
+### 5. 编译结果
+
+成功，退出码 0，零警告零错误。固件 `/Users/pwngwc/projects/ESP32/trae_proj_main/src/hardware/0701_radial_drag_menu/build/traepal_player.bin`（0x4ca90 字节，93% 空闲）。
+
+### 6. 可继续优化建议
+
+1. draw_arc_band 可改用 fill_circle 逐角度打点替代 draw_line，消除径向接缝锯齿
+2. 终点圆帽可加一层 shade565(fill, -0.3) 暗边作过渡，让白心与主色衔接更柔和
+3. 中央 `132` 数字可加 drop shadow（下方 1px 偏移 COL_DEEP_BLK）提升层级感

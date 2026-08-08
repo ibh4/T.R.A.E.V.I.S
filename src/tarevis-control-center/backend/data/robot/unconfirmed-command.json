@@ -1,0 +1,6 @@
+{
+  "requestId": "req_robot_unconfirmed_001",
+  "action": "turn_left",
+  "params": { "angleDeg": 45 },
+  "confirmed": false
+}

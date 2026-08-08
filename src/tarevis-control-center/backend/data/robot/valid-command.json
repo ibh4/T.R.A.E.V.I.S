@@ -1,0 +1,6 @@
+{
+  "requestId": "req_robot_forward_001",
+  "action": "forward",
+  "params": { "distanceCm": 30 },
+  "confirmed": true
+}

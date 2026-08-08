@@ -1,0 +1,9 @@
+{
+  "state": "idle",
+  "label": "空闲",
+  "project": "T.R.A.E.V.I.S. Control Center",
+  "task": "等待新的 TRAE 指令",
+  "progress": 0,
+  "suggestion": "提交一条文本任务以开始分析。",
+  "updatedAt": "2026-08-02T12:00:00.000Z"
+}

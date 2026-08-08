@@ -1,0 +1,7 @@
+[node]
+device_id = "raspberry-pi-home-01"
+default_zone = "living_room"
+
+[storage]
+events_file = "data/events.jsonl"
+media_settings_file = "data/media-settings.json"

@@ -1,0 +1,56 @@
+{
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8766,
+    "cors": false,
+    "bodyMaxBytes": 16384,
+    "responseMaxBytes": 65536,
+    "errorMaxChars": 512,
+    "responseTextMaxChars": 4096,
+    "queueMaxLength": 16,
+    "historyMaxLength": 100,
+    "strategyTimeoutMs": 60000,
+    "readinessTimeoutMs": 8000,
+    "shutdownEnabled": false
+  },
+  "strategy": "uiautomation",
+  "playwright": {
+    "channel": "msedge",
+    "headless": true,
+    "userDataDir": "./.edge-profile-trae",
+    "workUrl": "https://work.trae.cn/",
+    "inputSelector": "textarea[data-testid=\"chat_input\"], textarea[placeholder*=\"输入\"], div[contenteditable=\"true\"]",
+    "responseSelector": "[data-testid*=\"message\"], [class*=\"message\"], [class*=\"markdown\"], main",
+    "sendKey": "Enter",
+    "navigationTimeoutMs": 30000,
+    "actionTimeoutMs": 8000,
+    "slowMoMs": 0,
+    "responseTimeoutSec": 45,
+    "responsePollIntervalSec": 1,
+    "responseStableMs": 1500
+  },
+  "uiautomation": {
+    "windowTitlePattern": "Trae CN",
+    "openChatShortcut": ["ctrl", "u"],
+    "sendKey": "enter",
+    "focusWaitMs": 300,
+    "responseTimeoutSec": 25,
+    "responsePollIntervalSec": 1,
+    "executionTimeoutMs": 30000,
+    "readinessTimeoutMs": 7000
+  },
+  "prompts": {
+    "1": {
+      "label": "继续下一步",
+      "text": "继续推进当前任务的下一步"
+    },
+    "2": {
+      "label": "新开发推荐",
+      "text": "基于当前项目状态，推荐一个新的功能开发方向"
+    },
+    "3": {
+      "label": "工作汇报",
+      "text": "请汇总当前项目进度、已完成任务和待办事项"
+    }
+  }
+}

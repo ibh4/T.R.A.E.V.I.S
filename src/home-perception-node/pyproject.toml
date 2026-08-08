@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tarevis-home-node"
+version = "0.1.0"
+description = "Isolated home perception node for TAREVIS"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+vision = [
+  "numpy>=1.26,<3",
+  "opencv-python-headless>=4.10,<5",
+]
+audio = [
+  "sounddevice>=0.5,<1",
+]
+asr = [
+  "funasr>=1.2,<2",
+  "torch>=2.2,<3",
+  "torchaudio>=2.2,<3",
+]
+ui = [
+  "fastapi>=0.140,<1",
+  "httpx>=0.28,<1",
+  "uvicorn>=0.51,<1",
+  "websockets>=16,<17",
+]
+
+[project.scripts]
+tarevis-home-node = "tarevis_home_node.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.unittest]
+start-directory = "tests"

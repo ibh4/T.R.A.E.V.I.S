@@ -1,0 +1,24 @@
+{
+  "name": "trae-communicate",
+  "version": "0.1.0",
+  "description": "电子吧唧 -> TRAE 提示词发送桥接服务",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "start:headed": "cross-env HEADLESS=0 node server.js",
+    "calibrate": "node test/calibrate-trae.js",
+    "test": "node --test test/server.test.js",
+    "test:http": "node test/test-server.js",
+    "probe:trae": "node test/probe-trae-commands.js"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

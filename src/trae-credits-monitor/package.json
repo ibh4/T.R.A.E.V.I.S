@@ -1,0 +1,21 @@
+{
+  "name": "trae-credits-monitor",
+  "version": "1.0.0",
+  "description": "TRAE 速通额度监控工具 - 使用 Playwright 自动化查询速通剩余次数",
+  "main": "src/index.js",
+  "bin": {
+    "trae-credits": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "check": "node src/index.js check",
+    "login": "node src/index.js login",
+    "install:browsers": "playwright install chromium"
+  },
+  "keywords": ["trae", "fast-pass", "playwright", "monitoring"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.44.0"
+  }
+}

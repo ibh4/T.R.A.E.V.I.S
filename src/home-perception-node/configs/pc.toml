@@ -1,0 +1,7 @@
+[node]
+device_id = "pc-dev"
+default_zone = "unknown"
+
+[storage]
+events_file = "data/events.jsonl"
+media_settings_file = "data/media-settings.json"

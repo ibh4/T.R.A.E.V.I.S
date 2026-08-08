@@ -1,0 +1,8 @@
+{
+  "id": "vision",
+  "label": "VISION PIPELINE",
+  "value": 60,
+  "displayValue": "4.8 FPS",
+  "tone": "cyan",
+  "history": [45, 52, 63, 58, 67, 59, 60]
+}

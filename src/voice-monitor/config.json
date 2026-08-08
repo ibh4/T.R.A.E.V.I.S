@@ -1,0 +1,20 @@
+{
+  "model_dir": "models/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01",
+  "keywords_raw": "keywords_raw.txt",
+  "keywords_file": "keywords.txt",
+  "audio": {
+    "sample_rate": 16000,
+    "block_duration_seconds": 0.1,
+    "device": null
+  },
+  "kws": {
+    "num_threads": 2,
+    "max_active_paths": 4,
+    "num_trailing_blanks": 1,
+    "keywords_score": 1.0,
+    "keywords_threshold": 0.25,
+    "provider": "cpu"
+  },
+  "cooldown_seconds": 1.5
+}
+

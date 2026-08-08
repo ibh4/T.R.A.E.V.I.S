@@ -1,0 +1,8 @@
+{
+  "id": "cpu",
+  "label": "PC CORE LOAD",
+  "value": 42,
+  "displayValue": "42.0%",
+  "tone": "green",
+  "history": [28, 35, 31, 46, 38, 44, 42]
+}

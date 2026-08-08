@@ -1,0 +1,9 @@
+{
+  "serviceId": "robot-adapter",
+  "name": "Robot Adapter",
+  "connection": "offline",
+  "adapterMode": "live",
+  "version": "0.1.0",
+  "latency": "--",
+  "detail": "Robot Adapter has no live adapter"
+}

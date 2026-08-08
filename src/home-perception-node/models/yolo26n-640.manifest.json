@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "model_id": "ultralytics-yolo26n-detect-coco80-640",
+  "version": "checkpoint-v8.4.0-exporter-8.4.108-opset17",
+  "source_url": "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n.pt",
+  "license": "AGPL-3.0 (Ultralytics Enterprise alternative available)",
+  "model_file": "yolo26n.onnx",
+  "model_sha256": "ECB35FA67F893AF1FDDCFEB5816F3332C43254BFBCEC1745ACE500222EAA54D7",
+  "labels_file": "coco80.txt",
+  "labels_sha256": "BD17F1EE35D5F3C862A4894605855ABBB9DDA4B0621FDB0AC4C2C8C7BB7E730A",
+  "input_width": 640,
+  "input_height": 640,
+  "class_count": 80,
+  "task": "object_detection",
+  "format": "onnx"
+}

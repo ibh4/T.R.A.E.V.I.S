@@ -1,0 +1,11 @@
+{
+  "commandId": "cmd_fixture_succeeded_001",
+  "requestId": "req_fixture_succeeded_001",
+  "target": "trae",
+  "input": "汇总当前家庭事件",
+  "status": "succeeded",
+  "requestedAt": "2026-08-02T12:00:00.000Z",
+  "updatedAt": "2026-08-02T12:00:03.000Z",
+  "result": "已生成两步家庭事件建议。",
+  "adapterMode": "mock"
+}

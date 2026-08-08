@@ -1,0 +1,9 @@
+{
+  "serviceId": "events-module",
+  "name": "Events Module",
+  "connection": "online",
+  "adapterMode": "mock",
+  "version": "0.1.0",
+  "latency": "in-process",
+  "detail": "EventsModule registered with 1 events from mock source"
+}

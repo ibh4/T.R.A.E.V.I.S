@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TraePal 控制台</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #060908;
+      --panel: #0d1513;
+      --panel-2: #111b18;
+      --line: #21433b;
+      --line-hot: #37f18f;
+      --text: #eef8f3;
+      --muted: #8aa39a;
+      --teal: #22d3b6;
+      --green: #31ee7f;
+      --amber: #f6c64f;
+      --red: #ff5e6a;
+      --blue: #73a7ff;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.45;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(55, 241, 143, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 211, 182, 0.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent 82%);
+    }
+
+    .app-shell {
+      position: relative;
+      width: min(1480px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 16px;
+      min-height: 52px;
+      border-bottom: 1px solid rgba(55, 241, 143, 0.22);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: var(--green);
+      position: relative;
+      box-shadow: 0 0 22px rgba(49, 238, 127, 0.36);
+      flex: none;
+    }
+
+    .brand-mark::before {
+      content: "";
+      position: absolute;
+      inset: 9px 7px 13px;
+      border-radius: 4px;
+      background: #04100b;
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      left: 12px;
+      top: 16px;
+      background: var(--green);
+      transform: rotate(45deg);
+      box-shadow: 15px -1px 0 var(--green);
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 760;
+    }
+
+    .subline {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .connection-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      background: rgba(17, 27, 24, 0.82);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .connection-pill.connected {
+      color: #07110b;
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(260px, 340px) minmax(420px, 1fr) minmax(260px, 320px);
+      gap: 18px;
+      align-items: stretch;
+      min-height: 0;
+    }
+
+    .panel {
+      min-height: 0;
+      border: 1px solid rgba(55, 241, 143, 0.18);
+      background: rgba(13, 21, 19, 0.86);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      min-height: 58px;
+      padding: 16px;
+      border-bottom: 1px solid rgba(55, 241, 143, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .panel-meta {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .project-list {
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+      overflow: auto;
+      max-height: calc(100vh - 144px);
+    }
+
+    .project-row {
+      width: 100%;
+      text-align: left;
+      border: 1px solid rgba(138, 163, 154, 0.18);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      display: grid;
+      gap: 8px;
+      transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+    }
+
+    .project-row:hover,
+    .project-row.active {
+      border-color: rgba(55, 241, 143, 0.74);
+      background: #10241d;
+      transform: translateY(-1px);
+    }
+
+    .row-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .project-name {
+      font-size: 14px;
+      font-weight: 720;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status-chip {
+      border: 1px solid rgba(49, 238, 127, 0.42);
+      color: var(--green);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      flex: none;
+    }
+
+    .status-chip.bug_alert,
+    .status-chip.bug_maze {
+      border-color: rgba(255, 94, 106, 0.5);
+      color: var(--red);
+    }
+
+    .status-chip.fix_success {
+      border-color: rgba(246, 198, 79, 0.5);
+      color: var(--amber);
+    }
+
+    .row-summary {
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 34px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .progress-line {
+      height: 5px;
+      border-radius: 999px;
+      background: #1b2824;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), var(--teal));
+      transition: width 220ms ease;
+    }
+
+    .screen-stage {
+      display: grid;
+      place-items: center;
+      min-height: 620px;
+      border: 1px solid rgba(55, 241, 143, 0.18);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(16, 36, 29, 0.72), rgba(6, 9, 8, 0.94)),
+        radial-gradient(circle at center, rgba(34, 211, 182, 0.12), transparent 46%);
+      overflow: hidden;
+      padding: 28px;
+    }
+
+    .device {
+      width: min(466px, 92vw);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 8px solid #0b0d0d;
+      background:
+        linear-gradient(180deg, rgba(12, 20, 18, 0.92), rgba(2, 5, 4, 0.96)),
+        repeating-linear-gradient(0deg, rgba(55, 241, 143, 0.07), rgba(55, 241, 143, 0.07) 1px, transparent 1px, transparent 9px);
+      box-shadow:
+        inset 0 0 0 1px rgba(55, 241, 143, 0.36),
+        inset 0 0 70px rgba(34, 211, 182, 0.11),
+        0 28px 90px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 46px 1fr auto;
+      padding: 22px 34px 50px;
+    }
+
+    .device-statusbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #d9fff0;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .signal {
+      display: flex;
+      gap: 3px;
+      align-items: end;
+    }
+
+    .signal span {
+      width: 5px;
+      border-radius: 2px;
+      background: var(--green);
+    }
+
+    .signal span:nth-child(1) { height: 6px; }
+    .signal span:nth-child(2) { height: 9px; }
+    .signal span:nth-child(3) { height: 12px; }
+
+    .badge-content {
+      display: grid;
+      justify-items: center;
+      align-content: center;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .spider-bot {
+      position: relative;
+      width: 190px;
+      height: 150px;
+      transform-origin: center;
+      animation: bot-idle 3.2s ease-in-out infinite;
+    }
+
+    .spider-bot.status-task_charge,
+    .spider-bot.status-thinking_scan {
+      animation-duration: 1.4s;
+    }
+
+    .spider-bot.status-bug_alert {
+      animation: bot-alert 420ms linear infinite;
+    }
+
+    .bot-head {
+      position: absolute;
+      left: 50%;
+      top: 32px;
+      width: 104px;
+      height: 82px;
+      transform: translateX(-50%);
+      border-radius: 16px;
+      background: var(--green);
+      box-shadow: 0 0 28px rgba(49, 238, 127, 0.56);
+      z-index: 2;
+    }
+
+    .bot-face {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      top: 16px;
+      height: 44px;
+      border-radius: 7px;
+      background: #030807;
+    }
+
+    .bot-eye {
+      position: absolute;
+      top: 14px;
+      width: 15px;
+      height: 15px;
+      background: var(--green);
+      transform: rotate(45deg);
+      box-shadow: 0 0 12px rgba(49, 238, 127, 0.78);
+    }
+
+    .bot-eye.left { left: 22px; }
+    .bot-eye.right { right: 22px; }
+
+    .spider-bot.status-bug_alert .bot-eye,
+    .spider-bot.status-bug_maze .bot-eye {
+      background: var(--red);
+      box-shadow: 0 0 12px rgba(255, 94, 106, 0.78);
+    }
+
+    .spider-bot.status-fix_success .bot-eye {
+      background: var(--amber);
+      box-shadow: 0 0 12px rgba(246, 198, 79, 0.78);
+    }
+
+    .bot-neck {
+      position: absolute;
+      left: 50%;
+      top: 112px;
+      width: 30px;
+      height: 16px;
+      transform: translateX(-50%);
+      border-radius: 0 0 8px 8px;
+      background: #24b86f;
+      z-index: 1;
+    }
+
+    .leg {
+      position: absolute;
+      top: 82px;
+      width: 78px;
+      height: 24px;
+      border-top: 4px solid rgba(49, 238, 127, 0.86);
+      border-radius: 40px 0 0 0;
+      transform-origin: right center;
+      filter: drop-shadow(0 0 8px rgba(49, 238, 127, 0.35));
+    }
+
+    .leg::after {
+      content: "";
+      position: absolute;
+      width: 28px;
+      height: 4px;
+      left: -20px;
+      top: -4px;
+      border-radius: 999px;
+      background: rgba(115, 167, 255, 0.82);
+      transform: rotate(-32deg);
+    }
+
+    .leg.left { left: 2px; }
+    .leg.right {
+      right: 2px;
+      transform-origin: left center;
+      scale: -1 1;
+    }
+
+    .leg.l1 { top: 44px; rotate: 28deg; }
+    .leg.l2 { top: 70px; rotate: 8deg; }
+    .leg.l3 { top: 98px; rotate: -11deg; }
+    .leg.l4 { top: 124px; rotate: -31deg; }
+    .leg.r1 { top: 44px; rotate: -28deg; }
+    .leg.r2 { top: 70px; rotate: -8deg; }
+    .leg.r3 { top: 98px; rotate: 11deg; }
+    .leg.r4 { top: 124px; rotate: 31deg; }
+
+    .status-title {
+      width: 100%;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 760;
+      overflow-wrap: anywhere;
+    }
+
+    .status-copy {
+      width: min(320px, 100%);
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-wrap: anywhere;
+    }
+
+    .device-progress {
+      width: min(290px, 100%);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .choice-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      width: min(292px, 100%);
+      justify-self: center;
+      padding-top: 8px;
+      padding-bottom: 2px;
+    }
+
+    .choice-button {
+      min-height: 44px;
+      border: 1px solid rgba(138, 163, 154, 0.32);
+      border-radius: 8px;
+      background: rgba(7, 16, 13, 0.88);
+      color: var(--text);
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      align-items: center;
+      padding: 7px;
+      font-size: 12px;
+    }
+
+    .choice-button:hover,
+    .choice-button:focus-visible {
+      border-color: var(--green);
+      outline: none;
+    }
+
+    .choice-key {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--green);
+      color: #04100b;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .detail-stack {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .home-stack {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      border-bottom: 1px solid rgba(55, 241, 143, 0.16);
+    }
+
+    .home-current {
+      display: grid;
+      gap: 8px;
+      min-height: 106px;
+      border-left: 2px solid rgba(55, 241, 143, 0.62);
+      padding-left: 12px;
+    }
+
+    .home-current.level-medium {
+      border-left-color: var(--amber);
+    }
+
+    .home-current.level-high {
+      border-left-color: var(--red);
+    }
+
+    .home-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .home-title {
+      font-size: 15px;
+      font-weight: 760;
+      overflow-wrap: anywhere;
+    }
+
+    .level-chip {
+      border: 1px solid rgba(49, 238, 127, 0.42);
+      color: var(--green);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      flex: none;
+    }
+
+    .level-chip.medium {
+      border-color: rgba(246, 198, 79, 0.5);
+      color: var(--amber);
+    }
+
+    .level-chip.high {
+      border-color: rgba(255, 94, 106, 0.5);
+      color: var(--red);
+    }
+
+    .home-summary {
+      color: var(--muted);
+      font-size: 13px;
+      min-height: 36px;
+      overflow-wrap: anywhere;
+    }
+
+    .home-actions,
+    .home-choice-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .home-choice-row .tool-button {
+      min-width: 58px;
+    }
+
+    .home-mini-log {
+      display: grid;
+      gap: 8px;
+      max-height: 126px;
+      overflow: auto;
+    }
+
+    .home-mini-event {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      border-bottom: 1px solid rgba(138, 163, 154, 0.12);
+      padding-bottom: 8px;
+    }
+
+    .home-mini-event strong {
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+
+    .telemetry-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(138, 163, 154, 0.12);
+      font-size: 13px;
+    }
+
+    .telemetry-row span:first-child {
+      color: var(--muted);
+    }
+
+    .event-log {
+      padding: 12px 14px;
+      display: grid;
+      gap: 10px;
+      max-height: 310px;
+      overflow: auto;
+    }
+
+    .event-item {
+      border-left: 2px solid rgba(55, 241, 143, 0.55);
+      padding-left: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .event-item strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+
+    .command-row {
+      padding: 14px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(55, 241, 143, 0.16);
+    }
+
+    .tool-button {
+      min-height: 36px;
+      border: 1px solid rgba(138, 163, 154, 0.28);
+      border-radius: 8px;
+      background: #0a1411;
+      color: var(--text);
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .tool-button:hover {
+      border-color: var(--green);
+    }
+
+    @keyframes bot-idle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+
+    @keyframes bot-alert {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-2px); }
+      75% { transform: translateX(2px); }
+    }
+
+    @media (max-width: 1100px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .project-list {
+        max-height: none;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .screen-stage {
+        min-height: 560px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .app-shell {
+        padding: 14px;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .device {
+        padding: 18px 24px 28px;
+      }
+
+      .spider-bot {
+        width: 168px;
+        height: 134px;
+        transform: scale(0.88);
+      }
+
+      .choice-strip {
+        gap: 6px;
+      }
+
+      .choice-button {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        padding: 7px 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <h1>TraePal 智能吧唧</h1>
+          <div class="subline" id="screen-subtitle">同步 Trae Work 项目状态</div>
+        </div>
+      </div>
+      <div id="connection" class="connection-pill">离线预览</div>
+    </header>
+
+    <section class="workspace">
+      <aside class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">项目</div>
+            <div class="panel-meta" id="project-count">0 个项目</div>
+          </div>
+          <button class="tool-button" id="show-list" type="button">列表</button>
+        </div>
+        <div class="project-list" id="project-list"></div>
+      </aside>
+
+      <section class="screen-stage" aria-label="TraePal 圆形屏幕预览">
+        <div class="device">
+          <div class="device-statusbar">
+            <div class="signal" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div id="device-status">idle_ready</div>
+            <div>100%</div>
+          </div>
+
+          <div class="badge-content">
+            <div class="spider-bot status-idle_ready" id="spider-bot" aria-label="TraePal 电子蜘蛛形象">
+              <div class="leg left l1"></div>
+              <div class="leg left l2"></div>
+              <div class="leg left l3"></div>
+              <div class="leg left l4"></div>
+              <div class="leg right r1"></div>
+              <div class="leg right r2"></div>
+              <div class="leg right r3"></div>
+              <div class="leg right r4"></div>
+              <div class="bot-head">
+                <div class="bot-face">
+                  <span class="bot-eye left"></span>
+                  <span class="bot-eye right"></span>
+                </div>
+              </div>
+              <div class="bot-neck"></div>
+            </div>
+
+            <div class="status-title" id="status-title">Trae Work Demo</div>
+            <div class="status-copy" id="status-copy">等待同步项目</div>
+            <div class="device-progress">
+              <div class="progress-line"><div class="progress-fill" id="device-progress-fill"></div></div>
+              <div id="device-progress-label">0%</div>
+            </div>
+          </div>
+
+          <div class="choice-strip" id="choice-strip"></div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">详情</div>
+            <div class="panel-meta" id="detail-status">idle_ready</div>
+          </div>
+        </div>
+        <div class="detail-stack" id="detail-stack"></div>
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">家庭信息</div>
+            <div class="panel-meta" id="home-status">暂无事件</div>
+          </div>
+        </div>
+        <div class="home-stack">
+          <div class="home-current level-low" id="home-current">
+            <div class="home-head">
+              <div class="home-title" id="home-title">家庭状态正常</div>
+              <div class="level-chip low" id="home-level">LOW</div>
+            </div>
+            <div class="home-summary" id="home-summary">家里暂无需要处理的提醒</div>
+            <div class="home-choice-row" id="home-choice-row"></div>
+          </div>
+          <div class="home-actions" aria-label="模拟家庭事件">
+            <button class="tool-button" data-home-scenario="delivery" type="button">快递</button>
+            <button class="tool-button" data-home-scenario="visitor" type="button">访客</button>
+            <button class="tool-button" data-home-scenario="door" type="button">门口异常</button>
+            <button class="tool-button" data-home-scenario="kitchen" type="button">厨房风险</button>
+            <button class="tool-button" data-home-scenario="fall" type="button">疑似跌倒</button>
+          </div>
+          <div class="home-mini-log" id="home-mini-log"></div>
+        </div>
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">回执</div>
+            <div class="panel-meta" id="last-choice">等待选择</div>
+          </div>
+        </div>
+        <div class="event-log" id="event-log"></div>
+        <div class="command-row">
+          <button class="tool-button" data-demo-status="thinking_scan" type="button">分析</button>
+          <button class="tool-button" data-demo-status="task_charge" type="button">执行</button>
+          <button class="tool-button" data-demo-status="bug_alert" type="button">报错</button>
+          <button class="tool-button" data-demo-status="fix_success" type="button">完成</button>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const statusNames = {
+      idle_ready: '待机',
+      thinking_scan: '分析中',
+      task_charge: '执行中',
+      fix_success: '已完成',
+      bug_alert: '异常',
+      bug_maze: '警告',
+      sleepy_nudge: '休眠',
+      sync_ping: '同步中'
+    };
+
+    const demoChoices = {
+      idle_ready: [
+        { id: 'a', label: '开始同步', intent: 'continue', summary: '刷新项目状态' },
+        { id: 'b', label: '看项目', intent: 'inspect', summary: '进入项目详情' },
+        { id: 'c', label: '待机', intent: 'pause', summary: '保持轻提醒' }
+      ],
+      thinking_scan: [
+        { id: 'a', label: '看进度', intent: 'inspect', summary: '显示当前阶段' },
+        { id: 'b', label: '压缩摘要', intent: 'summarize', summary: '生成小屏摘要' },
+        { id: 'c', label: '暂停', intent: 'pause', summary: '等待人工确认' }
+      ],
+      task_charge: [
+        { id: 'a', label: '看进度', intent: 'inspect', summary: '显示当前阶段' },
+        { id: 'b', label: '压缩摘要', intent: 'summarize', summary: '生成小屏摘要' },
+        { id: 'c', label: '暂停', intent: 'pause', summary: '等待人工确认' }
+      ],
+      bug_alert: [
+        { id: 'a', label: '看错误', intent: 'inspect', summary: '打开错误摘要' },
+        { id: 'b', label: '生成修复', intent: 'fix', summary: '请求下一步修复方案' },
+        { id: 'c', label: '稍后处理', intent: 'pause', summary: '暂缓当前异常' }
+      ],
+      fix_success: [
+        { id: 'a', label: '看结果', intent: 'open', summary: '查看生成或测试结果' },
+        { id: 'b', label: '继续下一步', intent: 'continue', summary: '进入后续任务' },
+        { id: 'c', label: '回列表', intent: 'inspect', summary: '返回项目列表' }
+      ]
+    };
+
+    const homeChoices = [
+      { id: 'a', label: '确认', intent: 'confirm', summary: '标记家庭事件已处理' },
+      { id: 'b', label: '查看', intent: 'view', summary: '查看事件详情' },
+      { id: 'c', label: '静音', intent: 'silence', summary: '暂时压低当前提醒' }
+    ];
+
+    const homeScenarios = {
+      delivery: { type: 'delivery_detected', level: 'low', zone: 'door', title: '快递到达', summary: '门口检测到包裹，已做轻提醒', ackRequired: false, status: 'sync_ping' },
+      visitor: { type: 'visitor_detected', level: 'medium', zone: 'door', title: '访客停留', summary: '门口检测到访客停留，请留意', ackRequired: false, status: 'bug_maze' },
+      door: { type: 'door_event_detected', level: 'high', zone: 'door', title: '门口异常', summary: '门口出现异常停留或包裹状态变化', ackRequired: true, status: 'bug_alert' },
+      kitchen: { type: 'kitchen_risk_detected', level: 'high', zone: 'kitchen', title: '厨房风险', summary: '检测到厨房可能存在持续风险', ackRequired: true, status: 'bug_alert' },
+      fall: { type: 'fall_detected', level: 'high', zone: 'living_room', title: '疑似跌倒', summary: '检测到家人可能跌倒，需要确认', ackRequired: true, status: 'bug_alert' }
+    };
+
+    const demoState = {
+      type: 'traepal_screen_state',
+      screen: 'project_detail',
+      title: 'Trae Work 项目',
+      subtitle: '42% · 正在分析项目结构',
+      selectedProjectId: 'demo-traepal',
+      status: 'thinking_scan',
+      progress: 42,
+      projects: [
+        makeProject('demo-traepal', 'TraePal GUI', 'thinking_scan', 42, '正在分析多层级界面与触摸选择'),
+        makeProject('demo-bridge', 'TraePal Bridge', 'task_charge', 68, 'WebSocket 状态包已准备发送'),
+        makeProject('demo-firmware', 'ESP32 Player', 'idle_ready', 16, '屏幕动画和提示音已验证')
+      ],
+      detail: null,
+      timestamp: Date.now()
+    };
+    demoState.detail = demoState.projects[0];
+
+    const demoHomeState = {
+      type: 'home_screen_state',
+      screen: 'home_overview',
+      title: '家庭状态',
+      subtitle: '家里暂无需要处理的提醒',
+      status: 'idle_ready',
+      progress: 8,
+      events: [],
+      choices: [],
+      timestamp: Date.now()
+    };
+
+    let ws = null;
+    let currentState = demoState;
+    let currentHomeState = demoHomeState;
+    let selectedProjectId = demoState.selectedProjectId;
+    let homeEventCounter = 1;
+    const events = [];
+
+    const els = {
+      connection: document.getElementById('connection'),
+      subtitle: document.getElementById('screen-subtitle'),
+      projectCount: document.getElementById('project-count'),
+      projectList: document.getElementById('project-list'),
+      spider: document.getElementById('spider-bot'),
+      deviceStatus: document.getElementById('device-status'),
+      title: document.getElementById('status-title'),
+      copy: document.getElementById('status-copy'),
+      progressFill: document.getElementById('device-progress-fill'),
+      progressLabel: document.getElementById('device-progress-label'),
+      choices: document.getElementById('choice-strip'),
+      detailStatus: document.getElementById('detail-status'),
+      detailStack: document.getElementById('detail-stack'),
+      homeStatus: document.getElementById('home-status'),
+      homeCurrent: document.getElementById('home-current'),
+      homeTitle: document.getElementById('home-title'),
+      homeLevel: document.getElementById('home-level'),
+      homeSummary: document.getElementById('home-summary'),
+      homeChoices: document.getElementById('home-choice-row'),
+      homeMiniLog: document.getElementById('home-mini-log'),
+      lastChoice: document.getElementById('last-choice'),
+      eventLog: document.getElementById('event-log'),
+      showList: document.getElementById('show-list')
+    };
+
+    connect();
+    render(currentState);
+    renderHome(currentHomeState);
+
+    els.showList.addEventListener('click', () => {
+      currentState = { ...currentState, screen: 'project_list', detail: undefined };
+      render(currentState);
+    });
+
+    document.querySelectorAll('[data-demo-status]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const status = button.dataset.demoStatus;
+        const detail = { ...getSelectedProject(), status, progress: progressFor(status), choices: choicesFor(status) };
+        detail.summary = summaryFor(status);
+        currentState = {
+          ...currentState,
+          screen: 'project_detail',
+          status,
+          progress: detail.progress,
+          detail,
+          projects: currentState.projects.map((project) => project.id === detail.id ? detail : project),
+          subtitle: `${detail.progress}% · ${detail.summary}`,
+          timestamp: Date.now()
+        };
+        addEvent(statusNames[status] || status, detail.summary);
+        render(currentState);
+      });
+    });
+
+    document.querySelectorAll('[data-home-scenario]').forEach((button) => {
+      button.addEventListener('click', () => triggerHomeScenario(button.dataset.homeScenario));
+    });
+
+    function connect() {
+      try {
+        ws = new WebSocket('ws://localhost:8765');
+      } catch (error) {
+        setConnection(false);
+        return;
+      }
+
+      ws.addEventListener('open', () => {
+        setConnection(true);
+        addEvent('Bridge 已连接', 'ws://localhost:8765');
+      });
+
+      ws.addEventListener('close', () => {
+        setConnection(false);
+        addEvent('Bridge 已断开', '使用本地演示数据');
+      });
+
+      ws.addEventListener('error', () => {
+        setConnection(false);
+      });
+
+      ws.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'screen_update' && data.payload) {
+          currentState = normalizeState(data.payload);
+          selectedProjectId = currentState.selectedProjectId || currentState.projects[0]?.id;
+          addEvent('小屏状态更新', currentState.subtitle || currentState.status);
+          render(currentState);
+        }
+        if (data.type === 'user_choice_ack' && data.payload) {
+          currentState = { ...currentState, lastChoice: data.payload };
+          addEvent('选择已回传', data.payload.message || data.payload.choiceId);
+          render(currentState);
+        }
+        if (data.type === 'home_screen_update' && data.payload) {
+          currentHomeState = normalizeHomeState(data.payload);
+          addEvent('家庭状态更新', currentHomeState.subtitle || currentHomeState.status);
+          renderHome(currentHomeState);
+        }
+        if (data.type === 'home_choice_ack' && data.payload) {
+          currentHomeState = { ...currentHomeState, lastChoice: data.payload };
+          addEvent('家庭选择已回传', data.payload.message || data.payload.choiceId);
+          renderHome(currentHomeState);
+        }
+      });
+    }
+
+    function setConnection(connected) {
+      els.connection.classList.toggle('connected', connected);
+      els.connection.textContent = connected ? 'Bridge 已连接' : '离线预览';
+    }
+
+    function render(state) {
+      const detail = state.detail || state.projects.find((project) => project.id === selectedProjectId) || state.projects[0];
+      selectedProjectId = detail?.id;
+
+      els.subtitle.textContent = state.subtitle || detail?.summary || '同步 Trae Work 项目状态';
+      els.projectCount.textContent = `${state.projects.length} 个项目`;
+      els.projectList.innerHTML = state.projects.map((project) => projectRow(project, project.id === selectedProjectId)).join('');
+      els.projectList.querySelectorAll('[data-project-id]').forEach((button) => {
+        button.addEventListener('click', () => selectProject(button.dataset.projectId));
+      });
+
+      if (!detail) return;
+
+      const status = detail.status || state.status;
+      const progress = clamp(detail.progress ?? state.progress ?? 0, 0, 100);
+      els.spider.className = `spider-bot status-${status}`;
+      els.deviceStatus.textContent = status;
+      els.title.textContent = state.screen === 'project_list' ? 'Trae Work 项目' : detail.name;
+      els.copy.textContent = state.screen === 'project_list' ? '选择项目查看进度' : detail.summary;
+      els.progressFill.style.width = `${progress}%`;
+      els.progressLabel.textContent = `${progress}%`;
+      els.detailStatus.textContent = statusNames[status] || status;
+      els.choices.innerHTML = (detail.choices || []).map(choiceButton).join('');
+      els.choices.querySelectorAll('[data-choice-id]').forEach((button) => {
+        button.addEventListener('click', () => submitChoice(detail, button.dataset.choiceId));
+      });
+      els.detailStack.innerHTML = detailRows(detail);
+      els.lastChoice.textContent = state.lastChoice?.message || '等待选择';
+      renderEvents();
+    }
+
+    function renderHome(state) {
+      const current = state.currentEvent;
+      const level = current?.level || 'low';
+      const levelLabel = { low: 'LOW', medium: 'MED', high: 'HIGH' }[level] || 'LOW';
+
+      els.homeStatus.textContent = current
+        ? `${levelLabel} · ${homeStateName(current.state)}`
+        : '暂无事件';
+      els.homeCurrent.className = `home-current level-${escapeHtml(level)}`;
+      els.homeTitle.textContent = current?.title || '家庭状态正常';
+      els.homeLevel.className = `level-chip ${escapeHtml(level)}`;
+      els.homeLevel.textContent = levelLabel;
+      els.homeSummary.textContent = current?.summary || '家里暂无需要处理的提醒';
+      els.homeChoices.innerHTML = current ? (state.choices || homeChoices).map(homeChoiceButton).join('') : '';
+      els.homeChoices.querySelectorAll('[data-home-choice-id]').forEach((button) => {
+        button.addEventListener('click', () => submitHomeChoice(button.dataset.homeChoiceId));
+      });
+      els.homeMiniLog.innerHTML = (state.events || []).slice(0, 5).map(homeMiniEvent).join('');
+    }
+
+    function triggerHomeScenario(scenarioId) {
+      if (!homeScenarios[scenarioId]) return;
+
+      if (isWsOpen()) {
+        send({ type: 'trigger_home_event', payload: { scenario: scenarioId } });
+        addEvent('家庭事件触发', homeScenarios[scenarioId].title);
+        return;
+      }
+
+      const event = makeHomeEvent(scenarioId);
+      const events = [event, ...currentHomeState.events];
+      const currentEvent = selectTopHomeEvent(events);
+      currentHomeState = {
+        ...currentHomeState,
+        screen: 'home_event_detail',
+        title: currentEvent.title,
+        subtitle: currentEvent.summary,
+        status: currentEvent.status,
+        progress: homeProgressFor(currentEvent.status),
+        events,
+        currentEvent,
+        choices: homeChoices,
+        timestamp: Date.now()
+      };
+      addEvent('家庭事件触发', `${currentEvent.title} / ${currentEvent.summary}`);
+      renderHome(currentHomeState);
+    }
+
+    function submitHomeChoice(choiceId) {
+      const current = currentHomeState.currentEvent;
+      if (!current) return;
+
+      const choice = homeChoices.find((item) => item.id === choiceId);
+      if (!choice) return;
+
+      if (isWsOpen()) {
+        send({
+          type: 'home_choice',
+          payload: { eventId: current.id, choiceId, label: choice.label }
+        });
+        addEvent('家庭选择已提交', `${current.title} / ${choice.label}`);
+        return;
+      }
+
+      const nextState = homeStateForChoice(choice.intent);
+      const nextStatus = nextState === 'resolved' ? 'fix_success' : current.status;
+      const nextEvent = {
+        ...current,
+        state: nextState,
+        status: nextStatus,
+        timestamp: Date.now()
+      };
+      const events = currentHomeState.events.map((event) => event.id === nextEvent.id ? nextEvent : event);
+      currentHomeState = {
+        ...currentHomeState,
+        screen: 'home_choice_result',
+        title: nextEvent.title,
+        subtitle: nextEvent.summary,
+        status: nextStatus,
+        progress: homeProgressFor(nextStatus),
+        events,
+        currentEvent: nextEvent,
+        choices: homeChoices,
+        lastChoice: {
+          eventId: nextEvent.id,
+          choiceId,
+          label: choice.label,
+          accepted: true,
+          eventTitle: nextEvent.title,
+          intent: choice.intent,
+          message: homeChoiceMessage(choice, nextEvent),
+          timestamp: Date.now()
+        },
+        timestamp: Date.now()
+      };
+      addEvent('家庭选择已提交', currentHomeState.lastChoice.message);
+      renderHome(currentHomeState);
+    }
+
+    function selectProject(projectId) {
+      selectedProjectId = projectId;
+      const detail = currentState.projects.find((project) => project.id === projectId);
+      currentState = {
+        ...currentState,
+        screen: 'project_detail',
+        selectedProjectId: projectId,
+        detail,
+        status: detail?.status || currentState.status,
+        progress: detail?.progress || currentState.progress,
+        subtitle: detail ? `${detail.progress}% · ${detail.summary}` : currentState.subtitle
+      };
+      send({ type: 'select_project', payload: { projectId } });
+      render(currentState);
+    }
+
+    function submitChoice(project, choiceId) {
+      const choice = project.choices.find((item) => item.id === choiceId);
+      const payload = { projectId: project.id, choiceId, label: choice?.label };
+      send({ type: 'user_choice', payload });
+      currentState = {
+        ...currentState,
+        screen: 'choice_result',
+        lastChoice: {
+          ...payload,
+          accepted: true,
+          projectName: project.name,
+          nextStatus: 'sync_ping',
+          message: `已选择: ${choice?.label || choiceId}`,
+          timestamp: Date.now()
+        }
+      };
+      addEvent('选择已提交', `${project.name} / ${choice?.label || choiceId}`);
+      render(currentState);
+    }
+
+    function send(message) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(message));
+      }
+    }
+
+    function isWsOpen() {
+      return ws && ws.readyState === WebSocket.OPEN;
+    }
+
+    function projectRow(project, active) {
+      return `
+        <button class="project-row ${active ? 'active' : ''}" data-project-id="${escapeHtml(project.id)}" type="button">
+          <div class="row-head">
+            <div class="project-name">${escapeHtml(project.name)}</div>
+            <div class="status-chip ${escapeHtml(project.status)}">${escapeHtml(statusNames[project.status] || project.status)}</div>
+          </div>
+          <div class="row-summary">${escapeHtml(project.summary)}</div>
+          <div class="progress-line"><div class="progress-fill" style="width: ${clamp(project.progress, 0, 100)}%"></div></div>
+        </button>
+      `;
+    }
+
+    function choiceButton(choice) {
+      return `
+        <button class="choice-button" data-choice-id="${escapeHtml(choice.id)}" type="button">
+          <span class="choice-key">${escapeHtml(choice.id.toUpperCase())}</span>
+          <span>${escapeHtml(choice.label)}</span>
+        </button>
+      `;
+    }
+
+    function homeChoiceButton(choice) {
+      return `
+        <button class="tool-button" data-home-choice-id="${escapeHtml(choice.id)}" type="button">
+          ${escapeHtml(choice.label)}
+        </button>
+      `;
+    }
+
+    function homeMiniEvent(event) {
+      const levelLabel = { low: 'LOW', medium: 'MED', high: 'HIGH' }[event.level] || 'LOW';
+      return `
+        <div class="home-mini-event">
+          <strong>${escapeHtml(event.title)}</strong>
+          <span>${escapeHtml(levelLabel)} · ${escapeHtml(homeStateName(event.state))}</span>
+        </div>
+      `;
+    }
+
+    function detailRows(project) {
+      const rows = [
+        ['状态', statusNames[project.status] || project.status],
+        ['进度', `${project.progress}%`],
+        ['文件', String(project.metrics?.fileCount ?? 0)],
+        ['错误', String(project.metrics?.errorCount ?? 0)],
+        ['活动', project.metrics?.lastActivity ? new Date(project.metrics.lastActivity).toLocaleTimeString() : '--']
+      ];
+      return rows.map(([label, value]) => `
+        <div class="telemetry-row">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value)}</strong>
+        </div>
+      `).join('');
+    }
+
+    function renderEvents() {
+      els.eventLog.innerHTML = events.slice(0, 8).map((item) => `
+        <div class="event-item">
+          <strong>${escapeHtml(item.title)}</strong>
+          <span>${escapeHtml(item.body)}</span>
+        </div>
+      `).join('');
+    }
+
+    function addEvent(title, body) {
+      events.unshift({ title, body, time: Date.now() });
+      if (events.length > 20) events.pop();
+      renderEvents();
+    }
+
+    function normalizeHomeState(state) {
+      const homeEvents = Array.isArray(state.events) ? state.events : [];
+      const currentEvent = state.currentEvent || selectTopHomeEvent(homeEvents);
+      return {
+        ...demoHomeState,
+        ...state,
+        events: homeEvents,
+        currentEvent,
+        choices: currentEvent ? (state.choices && state.choices.length === 3 ? state.choices : homeChoices) : [],
+        status: state.status || currentEvent?.status || 'idle_ready',
+        progress: clamp(state.progress ?? homeProgressFor(state.status), 0, 100)
+      };
+    }
+
+    function normalizeState(state) {
+      const projects = (state.projects && state.projects.length ? state.projects : demoState.projects).map((project) => ({
+        ...project,
+        progress: clamp(project.progress ?? 0, 0, 100),
+        choices: project.choices && project.choices.length === 3 ? project.choices : choicesFor(project.status),
+        metrics: project.metrics || { fileCount: 0, errorCount: 0 }
+      }));
+      const detail = state.detail || projects.find((project) => project.id === state.selectedProjectId) || projects[0];
+      return {
+        ...state,
+        projects,
+        detail,
+        selectedProjectId: state.selectedProjectId || detail?.id,
+        progress: clamp(state.progress ?? detail?.progress ?? 0, 0, 100)
+      };
+    }
+
+    function makeProject(id, name, status, progress, summary) {
+      return {
+        id,
+        name,
+        status,
+        progress,
+        summary,
+        updatedAt: Date.now(),
+        choices: choicesFor(status),
+        metrics: { fileCount: 128, errorCount: status === 'bug_alert' ? 1 : 0, lastActivity: new Date().toISOString() }
+      };
+    }
+
+    function makeHomeEvent(scenarioId) {
+      const scenario = homeScenarios[scenarioId];
+      return {
+        id: `home_evt_${String(homeEventCounter++).padStart(4, '0')}`,
+        source: 'local_demo',
+        type: scenario.type,
+        level: scenario.level,
+        zone: scenario.zone,
+        title: scenario.title,
+        summary: scenario.summary,
+        state: 'detected',
+        ackRequired: scenario.ackRequired,
+        status: scenario.status,
+        timestamp: Date.now()
+      };
+    }
+
+    function selectTopHomeEvent(homeEvents) {
+      return [...homeEvents].sort((a, b) => {
+        const activeDelta = Number(b.state !== 'resolved') - Number(a.state !== 'resolved');
+        if (activeDelta) return activeDelta;
+        const levelRank = { high: 3, medium: 2, low: 1 };
+        const levelDelta = (levelRank[b.level] || 0) - (levelRank[a.level] || 0);
+        if (levelDelta) return levelDelta;
+        return (b.timestamp || 0) - (a.timestamp || 0);
+      })[0];
+    }
+
+    function homeStateForChoice(intent) {
+      return {
+        confirm: 'resolved',
+        view: 'waiting_ack',
+        silence: 'local_alert_sent'
+      }[intent] || 'local_alert_sent';
+    }
+
+    function homeChoiceMessage(choice, event) {
+      return {
+        confirm: `已确认: ${event.title}`,
+        view: `已打开详情: ${event.title}`,
+        silence: `已静音: ${event.title}`
+      }[choice.intent] || `已选择: ${choice.label}`;
+    }
+
+    function homeStateName(state) {
+      return {
+        detected: '已检测',
+        local_alert_sent: '轻提醒',
+        waiting_ack: '待确认',
+        resolved: '已解决',
+        escalated: '已升级'
+      }[state] || state || '--';
+    }
+
+    function homeProgressFor(status) {
+      return {
+        idle_ready: 8,
+        sync_ping: 32,
+        bug_maze: 64,
+        bug_alert: 86,
+        fix_success: 100
+      }[status] || 8;
+    }
+
+    function getSelectedProject() {
+      return currentState.detail || currentState.projects.find((project) => project.id === selectedProjectId) || currentState.projects[0];
+    }
+
+    function choicesFor(status) {
+      return demoChoices[status] || demoChoices.idle_ready;
+    }
+
+    function progressFor(status) {
+      return {
+        idle_ready: 8,
+        thinking_scan: 42,
+        task_charge: 68,
+        bug_alert: 72,
+        fix_success: 100
+      }[status] || 0;
+    }
+
+    function summaryFor(status) {
+      return {
+        idle_ready: '等待同步项目',
+        thinking_scan: '正在分析项目结构',
+        task_charge: '正在执行 Bridge 同步',
+        bug_alert: '检测到异常，需要下一步选择',
+        fix_success: '修复完成，可以继续推进'
+      }[status] || '同步 Trae Work 项目状态';
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, Number(value) || 0));
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>

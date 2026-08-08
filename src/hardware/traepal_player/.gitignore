@@ -1,0 +1,23 @@
+# 编译产物
+build/
+sdkconfig
+sdkconfig.old
+
+# 自动下载的依赖
+managed_components/
+
+# 大二进制帧文件 (10MB, 从 output/traepal_sequences_466_aggressive/ 生成)
+frames.bin
+
+# SPIFFS 镜像源数据
+spiffs_image/
+
+# 依赖锁
+dependencies.lock
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store

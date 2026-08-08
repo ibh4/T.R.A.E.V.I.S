@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "evt_fixture_resolved_001",
+  "deviceId": "home-node-rpi4-01",
+  "source": "vision",
+  "type": "fall_suspected",
+  "level": "critical",
+  "state": "resolved",
+  "zone": "客厅",
+  "title": "检测到疑似跌倒姿态",
+  "summary": "人物姿态持续处于低位，事件已完成人工处置。",
+  "confidence": 0.82,
+  "occurredAt": "2026-08-02T10:00:00.000Z",
+  "updatedAt": "2026-08-02T10:02:00.000Z",
+  "acknowledgedAt": "2026-08-02T10:01:00.000Z",
+  "acknowledgedBy": "local-demo-user",
+  "resolvedAt": "2026-08-02T10:02:00.000Z",
+  "resolvedBy": "local-demo-user",
+  "adapterMode": "mock",
+  "payload": { "duration_ms": 8210, "person_count": 1 }
+}

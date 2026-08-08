@@ -1,0 +1,11 @@
+{
+  "commandId": "cmd_fixture_expired_001",
+  "requestId": "req_fixture_expired_001",
+  "target": "trae",
+  "input": "执行超时场景测试",
+  "status": "expired",
+  "requestedAt": "2026-08-02T12:00:00.000Z",
+  "updatedAt": "2026-08-02T12:00:03.000Z",
+  "result": "Mock TRAE 执行已超时。",
+  "adapterMode": "mock"
+}

@@ -1,0 +1,117 @@
+import type { AppState } from "./types";
+
+export const initialState: AppState = {
+  page: "guard",
+  mood: "idle",
+  severity: "normal",
+  selectedEventId: "evt_ready",
+  returnPage: null,
+  demoPanelOpen: false,
+  notice: null,
+  mediaSettingsOpen: false,
+  mediaBusy: false,
+  mediaDraft: {
+    cameraId: "demo-camera-0",
+    microphoneId: "demo-microphone-0",
+  },
+  mediaInventory: {
+    scannedAt: new Date().toISOString(),
+    warnings: [],
+    cameras: [
+      {
+        kind: "camera",
+        stableId: "demo-camera-0",
+        name: "模拟摄像头 0",
+        index: 0,
+        backend: "DEMO",
+        maxInputChannels: null,
+        defaultSampleRate: null,
+        frameWidth: 640,
+        frameHeight: 480,
+        frameRate: 30,
+      },
+    ],
+    microphones: [
+      {
+        kind: "microphone",
+        stableId: "demo-microphone-0",
+        name: "模拟麦克风 0",
+        index: 0,
+        backend: "DEMO",
+        maxInputChannels: 1,
+        defaultSampleRate: 16000,
+        frameWidth: null,
+        frameHeight: null,
+        frameRate: null,
+      },
+    ],
+    settings: {
+      cameraId: "demo-camera-0",
+      cameraIndex: 0,
+      microphoneId: "demo-microphone-0",
+      microphoneIndex: 0,
+      updatedAt: null,
+    },
+  },
+  snapshot: {
+    connected: false,
+    deviceId: "rpi-home-01",
+    camera: "standby",
+    microphone: "standby",
+    visionFps: 0,
+    inferenceMs: null,
+    motionScore: 0,
+    audioLevel: 0.18,
+    keywordConfidence: null,
+    cpuTemp: null,
+    uptimeSeconds: 0,
+    previewUrl: null,
+    lastTranscript: null,
+    lastError: null,
+    events: [
+      {
+        id: "evt_ready",
+        type: "node_ready",
+        title: "系统已就绪",
+        detail: "等待连接本地视觉与音频服务",
+        source: "system",
+        level: "info",
+        zone: "home",
+        occurredAt: new Date().toISOString(),
+        resolved: true,
+      },
+    ],
+  },
+};
+
+export const audioBars = [34, 58, 43, 76, 52, 88, 64, 40, 70, 48, 82, 56];
+
+export const streamLines = [
+  "0xA14F :: FRAME_SYNC",
+  "0x09C2 :: ROI_HOME",
+  "0xB881 :: EVENT_BUS",
+  "0x3D17 :: LOCAL_ONLY",
+  "0x7AA4 :: MOTION_GATE",
+  "0xC021 :: AUDIO_ROUTE",
+  "0x61E8 :: SCHEMA_1.0",
+  "0x442D :: SNAPSHOT_Q",
+  "0xD70A :: WS_CHANNEL",
+  "0x182C :: TOUCH_READY",
+  "0x9F35 :: DISPLAY_480",
+  "0x5B0E :: NODE_GUARD",
+  "0xE114 :: SENSOR_FUSE",
+  "0x2C88 :: PRIVACY_ON",
+];
+
+export const telemetryStreamLines = [
+  "RX 0x0A7E / OK",
+  "TX 0x31D4 / LOCAL",
+  "BUS 0xF021 / LIVE",
+  "CAM 0x84BC / CSI",
+  "MIC 0x10A8 / PCM",
+  "UI 0x4813 / TOUCH",
+  "EVT 0x992A / READY",
+  "MEM 0x27D0 / STABLE",
+  "NET 0xA117 / LOOP",
+  "SYS 0x5F2B / ARMED",
+];

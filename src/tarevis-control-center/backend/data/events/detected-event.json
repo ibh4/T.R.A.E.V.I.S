@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "evt_fixture_detected_001",
+  "deviceId": "home-node-rpi4-01",
+  "source": "vision",
+  "type": "fall_suspected",
+  "level": "critical",
+  "state": "detected",
+  "zone": "客厅",
+  "title": "检测到疑似跌倒姿态",
+  "summary": "人物姿态持续处于低位，等待人工确认。",
+  "confidence": 0.82,
+  "occurredAt": "2026-08-02T10:00:00.000Z",
+  "updatedAt": "2026-08-02T10:00:00.000Z",
+  "adapterMode": "mock",
+  "payload": { "duration_ms": 8210, "person_count": 1 }
+}

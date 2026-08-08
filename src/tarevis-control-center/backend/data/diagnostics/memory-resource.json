@@ -1,0 +1,8 @@
+{
+  "id": "memory",
+  "label": "MEMORY BUFFER",
+  "value": 34,
+  "displayValue": "2.7 GB RSS",
+  "tone": "green",
+  "history": [21, 26, 28, 29, 31, 33, 34]
+}

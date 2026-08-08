@@ -1,0 +1,12 @@
+build/
+sdkconfig
+sdkconfig.old
+managed_components/
+frames.bin
+frames_spider.bin
+spiffs_image/
+spider_frames/
+dependencies.lock
+.vscode/
+.idea/
+.DS_Store

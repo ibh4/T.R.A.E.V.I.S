@@ -1,0 +1,12 @@
+{
+  "deviceId": "badge-esp32-01",
+  "name": "TRAEVIS 实体终端",
+  "kind": "badge",
+  "zone": "书房",
+  "connection": "offline",
+  "detail": "Mock 心跳已暂停，可通过 heartbeat API 恢复",
+  "lastSeen": "2026-08-02T11:59:10.000Z",
+  "metricLabel": "BATTERY",
+  "metricValue": "91%",
+  "adapterMode": "mock"
+}

@@ -1,0 +1,9 @@
+{
+  "serviceId": "devices-module",
+  "name": "Devices Module",
+  "connection": "degraded",
+  "adapterMode": "mock",
+  "version": "0.1.0",
+  "latency": "in-process",
+  "detail": "DevicesModule registered with 6 devices from mock source"
+}

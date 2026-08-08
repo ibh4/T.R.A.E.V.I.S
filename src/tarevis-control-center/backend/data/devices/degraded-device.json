@@ -1,0 +1,12 @@
+{
+  "deviceId": "microphone-usb-01",
+  "name": "USB Microphone",
+  "kind": "microphone",
+  "zone": "客厅",
+  "connection": "degraded",
+  "detail": "设备已选择，真实采样尚未验收",
+  "lastSeen": "2026-08-02T11:59:40.000Z",
+  "metricLabel": "INPUT LEVEL",
+  "metricValue": "--",
+  "adapterMode": "mock"
+}

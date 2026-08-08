@@ -1,0 +1,9 @@
+{
+  "state": "offline",
+  "label": "未接入",
+  "project": "--",
+  "task": "TRAE 模块尚未接入。",
+  "progress": 0,
+  "suggestion": "等待 TRAE Adapter 接入。",
+  "updatedAt": "1970-01-01T00:00:00.000Z"
+}

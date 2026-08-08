@@ -1,0 +1,12 @@
+{
+  "deviceId": "pc-core-01",
+  "name": "TRAEVIS PC Core",
+  "kind": "pc",
+  "zone": "书房",
+  "connection": "online",
+  "detail": "状态服务与 Control Center 后端运行中",
+  "lastSeen": "2026-08-02T12:00:00.000Z",
+  "metricLabel": "CORE TEMP",
+  "metricValue": "46°C",
+  "adapterMode": "mock"
+}

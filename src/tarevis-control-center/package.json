@@ -1,0 +1,40 @@
+{
+  "name": "tarevis-control-center",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:demo": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-demo.ps1",
+    "demo:smoke": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/demo-smoke.ps1",
+    "build": "tsc --noEmit && vite build",
+    "build:production": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-production.ps1",
+    "deploy:frontend": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-pages.ps1",
+    "relay:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/relay-check.ps1",
+    "relay:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-backend-relay.ps1",
+    "relay:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-backend-relay.ps1 -Development",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:agent": "playwright test --config playwright.agent.config.ts",
+    "test:e2e:live": "npm run build --prefix backend && playwright test --config playwright.live.config.ts"
+  },
+  "dependencies": {
+    "@types/dompurify": "^3.0.5",
+    "dompurify": "^3.4.13",
+    "lucide-react": "^0.468.0",
+    "marked": "^18.0.9",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tsx": "^4.20.3",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
+}

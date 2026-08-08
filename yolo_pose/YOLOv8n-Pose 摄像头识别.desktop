@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=YOLOv8n-Pose 摄像头识别
+Comment=NCNN 实时人体姿势识别 (imgsz=320)
+Exec=bash -c "/home/peng/yoloenv/bin/python /home/peng/yolo_pose_cam.py; sleep 1"
+Icon=preferences-desktop-personal
+Terminal=true
+Categories=Utility;Application;
+StartupNotify=true

@@ -1,0 +1,5 @@
+numpy>=1.26,<3
+pypinyin>=0.55,<1
+sentencepiece>=0.2,<1
+sherpa-onnx==1.13.4
+sounddevice>=0.5,<1

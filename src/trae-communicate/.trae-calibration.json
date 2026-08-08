@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "calibratedAt": "2026-08-04T14:33:54.046311+00:00",
+  "windowKeyword": "Trae CN",
+  "windowTitle": "更新日志 - HeartNote - Trae CN",
+  "window": {
+    "left": 2549,
+    "top": -11,
+    "width": 3862,
+    "height": 2110
+  },
+  "inputClickRatio": {
+    "x": 0.765665,
+    "y": 0.894313
+  },
+  "inputAbsoluteAtCalibration": {
+    "x": 5506,
+    "y": 1876
+  },
+  "method": "ocr-placeholder",
+  "matchedText": "正在与 Agent 聊天，输入 7 ' 获取更多能力，如 '/plan', '/s pec'",
+  "evidencePath": "C:\\Users\\lijie\\AppData\\Local\\Temp\\trae-communicate\\trae-result-20260804-223351.bmp"
+}
