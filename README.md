@@ -1,16 +1,16 @@
-# T.R.A.E.V.I.S.：TRAE Agent 的多端协同具身 AI 系统
+# T.R.A.E.V.I.S. — TRAE Agent 的多端协同具身 AI 系统
 
 <p align="center">
-  <b>ESP32-S3 × TRAE Agent × 统一中台 × 边缘感知 × 机器人执行</b><br>
-  以 TRAE Agent 为认知核心，以统一状态中台为枢纽，以电子吧唧、家庭感知节点和机器人为现实接口的个人级多端协同智能系统。
+  <b>TRAE Agent × ESP32-S3 × Raspberry Pi × Unified Hub × Embodied AI</b><br>
+  让 TRAE 不只存在于 IDE：它可以感知现实、同步状态、提醒用户，并在授权后驱动真实设备执行。
 </p>
 
 <p align="center">
-  <img alt="Hardware" src="https://img.shields.io/badge/Hardware-ESP32--S3-00B4D8?style=for-the-badge">
   <img alt="Brain" src="https://img.shields.io/badge/Brain-TRAE%20Agent-9B5DE5?style=for-the-badge">
-  <img alt="Hub" src="https://img.shields.io/badge/Hub-T.R.A.E.V.I.S.%20%E4%B8%AD%E5%8F%B0-32f08c?style=for-the-badge">
+  <img alt="Hub" src="https://img.shields.io/badge/Hub-T.R.A.E.V.I.S.-32F08C?style=for-the-badge">
+  <img alt="Badge" src="https://img.shields.io/badge/Badge-ESP32--S3-00B4D8?style=for-the-badge">
   <img alt="Edge" src="https://img.shields.io/badge/Edge-Raspberry%20Pi-C51A4E?style=for-the-badge">
-  <img alt="Robot" src="https://img.shields.io/badge/Robot-Spider%20Bot-FFB703?style=for-the-badge">
+  <img alt="Robot" src="https://img.shields.io/badge/Embodied-Spider%20Bot-FFB703?style=for-the-badge">
 </p>
 
 <p align="center">
@@ -21,11 +21,17 @@
 
 ## 0. 项目一句话
 
-**T.R.A.E.V.I.S.**（Think · Reason · Act · Exhibit · Visualize · Interact · Sync）是一套以 **TRAE Agent 为认知核心**、以 **统一状态与编排中台为系统枢纽**、以 **边缘感知节点、实体交互终端和执行设备为现实接口** 的个人级多端协同智能系统。它把项目运行态、家庭事件、设备状态和用户指令组织成同一条状态流：由 TRAE 理解上下文并生成建议或高层意图，由中台负责汇聚、分发、确认和追踪，再通过电子吧唧、树莓派屏幕、手机和机器人完成提醒、交互与受控执行，形成"感知 → 汇聚 → 理解 → 提醒 → 确认 → 执行 → 回传"的闭环。
+**T.R.A.E.V.I.S.**（Think · Reason · Act · Exhibit · Visualize · Interact · Sync）是一套以 **TRAE Agent 为认知核心**、以 **统一状态中台为枢纽**、以 **电子吧唧、家庭边缘感知节点和机器人** 为现实接口的多端协同具身 AI 系统。
 
-这个项目的目标不是让用户随时随地加班，而是让 AI 承担等待、观察和重复执行，让开发不再受空间限制，让人回到生活。
+它把原本分散在 IDE、家庭设备和机器人中的状态统一成一条可追踪的闭环：
 
-> 当前仓库定位：**ESP32-S3 圆屏电子吧唧固件 + 统一状态中台 + 家庭边缘感知节点 + TRAE Bridge + 机器人受控执行闭环**。
+**感知 → 汇聚 → 理解 → 提醒 → 确认 → 执行 → 回传**
+
+TRAE 负责理解上下文与生成高层意图；中台负责状态同步、事件分级、权限校验和任务编排；树莓派负责本地感知；ESP32-S3 电子吧唧负责随身提醒与交互；机器人则在用户授权和安全边界内执行动作。
+
+> **项目目标**：让 AI 承担等待、观察与重复执行，让开发者不再被固定在工位，也让 AI 从屏幕中的软件 Agent 进一步成为能够连接现实世界的个人智能系统。
+
+> **当前仓库定位**：ESP32-S3 圆屏电子吧唧 + T.R.A.E.V.I.S. 统一中台 + 家庭边缘感知节点 + TRAE Bridge + 机器人受控执行闭环。
 
 ---
 
@@ -74,95 +80,60 @@ T.R.A.E.V.I.S. 用统一中枢连接项目状态、家庭事件和硬件状态�
 ## 3. 总体架构：从感知到执行的完整闭环
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#0B1020", "primaryColor": "#172554", "primaryTextColor": "#F8FAFC", "primaryBorderColor": "#38BDF8", "lineColor": "#94A3B8", "tertiaryColor": "#111827"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#FFFFFF", "primaryColor": "#2563EB", "primaryTextColor": "#0F172A", "primaryBorderColor": "#67E8F9", "secondaryColor": "#7C3AED", "tertiaryColor": "#E0F2FE", "lineColor": "#0284C7", "clusterBkg": "#F8FBFF", "clusterBorder": "#38BDF8", "edgeLabelBackground": "#FFFFFF"}}}%%
 flowchart LR
-    U([用户<br/>开发者 / 家庭照护者]):::user
+    USER["用户<br/>开发者 / 家庭照护者"]:::user
+    TRAE["TRAE Agent<br/>理解上下文 / 生成高层意图"]:::brain
+    HUB["T.R.A.E.V.I.S. 中台<br/>状态 · 事件 · 权限 · 编排"]:::hub
+    EDGE["边缘感知<br/>Raspberry Pi + Camera"]:::edge
+    BADGE["电子吧唧<br/>ESP32-S3"]:::badge
+    ROBOT["受控执行<br/>Spider Bot"]:::robot
+    RESULT["状态回传<br/>记录 / 同步 / 闭环"]:::result
 
-    subgraph T[TRAE 认知层]
-        TRAE[TRAE Agent<br/>理解上下文 / 生成建议]:::brain
-        BRIDGE[PC Bridge<br/>请求投递 / 结果回传]:::bridge
-    end
-
-    subgraph H[T.R.A.E.V.I.S. 中台]
-        HUB[统一状态快照<br/>revision + WebSocket]:::hub
-        EVENT[事件生命周期<br/>detected→acknowledged→resolved]:::event
-        CMD[命令生命周期<br/>排队→送达→回执]:::cmd
-        ADAPTER[设备 Adapter<br/>权限 / 白名单 / 编排]:::adapter
-    end
-
-    subgraph E[边缘感知层]
-        RPI[树莓派感知节点<br/>YOLO + OpenCV]:::rpi
-        CAM[摄像头 / 麦克风]:::cam
-        POSE[跌倒姿态检测]:::pose
-    end
-
-    subgraph D[实体终端层]
-        BADGE[电子吧唧<br/>ESP32-S3 圆屏]:::badge
-        PHONE[手机 / 网页]:::phone
-        SCREEN[树莓派家庭屏幕]:::screen
-    end
-
-    subgraph R[执行设备层]
-        SPIDER[电子蜘蛛<br/>USB 控制板]:::spider
-        STOP[本地急停<br/>运动保护]:::stop
-    end
-
-    U --> TRAE
-    TRAE --> BRIDGE
-    BRIDGE <--> HUB
-    HUB --> EVENT
-    HUB --> CMD
-    CMD --> ADAPTER
-    CAM --> RPI
-    RPI --> POSE
-    POSE --> HUB
+    USER --> TRAE
+    TRAE <--> HUB
+    EDGE --> HUB
     HUB <--> BADGE
-    HUB <--> PHONE
-    HUB <--> SCREEN
-    ADAPTER --> SPIDER
-    SPIDER --> STOP
+    HUB --> ROBOT
+    ROBOT --> RESULT
+    RESULT --> HUB
 
-    classDef user fill:#F97316,stroke:#FED7AA,color:#111827,stroke-width:2px;
+    classDef user fill:#F97316,stroke:#FFEDD5,color:#111827,stroke-width:2px;
     classDef brain fill:#9B5DE5,stroke:#DDD6FE,color:#FFFFFF,stroke-width:2px;
-    classDef bridge fill:#7C3AED,stroke:#EDE9FE,color:#FFFFFF,stroke-width:2px;
-    classDef hub fill:#32f08c,stroke:#A7F3D0,color:#052E16,stroke-width:3px;
-    classDef event fill:#EF4444,stroke:#FECACA,color:#FFFFFF,stroke-width:2px;
-    classDef cmd fill:#06B6D4,stroke:#A5F3FC,color:#042F2E,stroke-width:2px;
-    classDef adapter fill:#2563EB,stroke:#BFDBFE,color:#FFFFFF,stroke-width:2px;
-    classDef rpi fill:#C51A4E,stroke:#FBCFE8,color:#FFFFFF,stroke-width:2px;
-    classDef cam fill:#10B981,stroke:#A7F3D0,color:#052E16,stroke-width:2px;
-    classDef pose fill:#EAB308,stroke:#FEF3C7,color:#111827,stroke-width:2px;
+    classDef hub fill:#32F08C,stroke:#A7F3D0,color:#052E16,stroke-width:3px;
+    classDef edge fill:#C51A4E,stroke:#FBCFE8,color:#FFFFFF,stroke-width:2px;
     classDef badge fill:#00B4D8,stroke:#BAE6FD,color:#082F49,stroke-width:2px;
-    classDef phone fill:#8B5CF6,stroke:#EDE9FE,color:#FFFFFF,stroke-width:2px;
-    classDef screen fill:#14B8A6,stroke:#CCFBF1,color:#042F2E,stroke-width:2px;
-    classDef spider fill:#FFB703,stroke:#FEF3C7,color:#111827,stroke-width:2px;
-    classDef stop fill:#DC2626,stroke:#FECACA,color:#FFFFFF,stroke-width:3px;
+    classDef robot fill:#FFB703,stroke:#FEF3C7,color:#111827,stroke-width:2px;
+    classDef result fill:#22C55E,stroke:#DCFCE7,color:#052E16,stroke-width:2px;
 ```
 
-这张图表达了 T.R.A.E.V.I.S. 的核心逻辑：**TRAE 负责理解与规划，中台负责状态与编排，感知节点负责现实感知，电子吧唧负责实体交互，机器人负责受控执行**。它不是把所有功能堆在一个设备里，而是按认知、状态、感知、交互和执行分层组织，让每个模块职责清晰、可替换、可扩展。
+这张图概括了系统最核心的分工：**TRAE 负责理解，中台负责组织，边缘节点负责感知，电子吧唧负责交互，机器人负责执行**。各模块通过统一状态流连接，既能独立替换，也能继续扩展新的设备身体。
 
 ---
 
 ## 4. 状态流转：感知 → 汇聚 → 理解 → 提醒 → 确认 → 执行 → 回传
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#020617", "primaryTextColor": "#F8FAFC", "lineColor": "#CBD5E1"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#FFFFFF", "primaryColor": "#2563EB", "primaryTextColor": "#0F172A", "primaryBorderColor": "#67E8F9", "secondaryColor": "#7C3AED", "tertiaryColor": "#E0F2FE", "lineColor": "#0284C7", "clusterBkg": "#F8FBFF", "clusterBorder": "#38BDF8", "edgeLabelBackground": "#FFFFFF"}}}%%
 flowchart LR
-    P1[1 感知<br/>摄像头/IMU/项目状态]:::p1 --> P2[2 汇聚<br/>中台统一快照]:::p2
-    P2 --> P3[3 理解<br/>TRAE 生成建议]:::p3
-    P3 --> P4[4 提醒<br/>多端分级触达]:::p4
-    P4 --> P5[5 确认<br/>用户授权决策]:::p5
-    P5 --> P6[6 执行<br/>机器人受控动作]:::p6
-    P6 --> P7[7 回传<br/>状态与结果记录]:::p7
+    P1["1 感知<br/>项目 / 摄像头 / IMU"]:::p1
+    P2["2 汇聚<br/>统一状态中台"]:::p2
+    P3["3 理解<br/>TRAE Agent"]:::p3
+    P4["4 提醒<br/>多端分级触达"]:::p4
+    P5["5 确认<br/>用户授权"]:::p5
+    P6["6 执行<br/>机器人动作"]:::p6
+    P7["7 回传<br/>状态记录"]:::p7
+
+    P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7
     P7 -.->|闭环| P2
 
     classDef p1 fill:#10B981,stroke:#A7F3D0,color:#052E16,stroke-width:2px;
-    classDef p2 fill:#32f08c,stroke:#A7F3D0,color:#052E16,stroke-width:3px;
+    classDef p2 fill:#32F08C,stroke:#A7F3D0,color:#052E16,stroke-width:3px;
     classDef p3 fill:#9B5DE5,stroke:#DDD6FE,color:#FFFFFF,stroke-width:2px;
     classDef p4 fill:#F59E0B,stroke:#FEF3C7,color:#111827,stroke-width:2px;
-    classDef p5 fill:#06B6D4,stroke:#A5F3FC,color:#042F2E,stroke-width:2px;
+    classDef p5 fill:#06B6D4,stroke:#CFFAFE,color:#083344,stroke-width:2px;
     classDef p6 fill:#FFB703,stroke:#FEF3C7,color:#111827,stroke-width:2px;
-    classDef p7 fill:#EC4899,stroke:#FBCFE8,color:#FFFFFF,stroke-width:2px;
+    classDef p7 fill:#EC4899,stroke:#FCE7F3,color:#FFFFFF,stroke-width:2px;
 ```
 
 无论是项目状态变化还是家庭事件，都沿着同一条链路流转：感知产生事实 → 中台汇聚与分级 → TRAE 理解与建议 → 多端提醒 → 用户确认 → 受控执行 → 结果回传，最终回到中台形成完整记录。
@@ -304,44 +275,29 @@ TRAE 可以结合上下文给出处置建议。只有在用户确认后，中台
 ## 9. 电子吧唧固件架构
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#111827", "primaryTextColor": "#F9FAFB", "lineColor": "#9CA3AF"}}}%%
-flowchart TB
-    subgraph FW[ESP32-S3 固件]
-        INIT[BSP 初始化<br/>CO5300 AMOLED 466×466]:::init
-        TOUCH[CST9217 触摸<br/>I2C 0x5A]:::touch
-        IMU[QMI8658C IMU<br/>摇动检测]:::imu
-        WIFI[WiFi STA<br/>TCP 状态接收]:::wifi
-        FONT[中文字库<br/>32×32 Alpha Mask]:::font
-        ANIM[状态动画<br/>10 状态 × 12 帧]:::anim
-        UI[圆屏 UI<br/>径向菜单 / 积分页]:::ui
-    end
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#FFFFFF", "primaryColor": "#2563EB", "primaryTextColor": "#0F172A", "primaryBorderColor": "#67E8F9", "secondaryColor": "#7C3AED", "tertiaryColor": "#E0F2FE", "lineColor": "#0284C7", "clusterBkg": "#F8FBFF", "clusterBorder": "#38BDF8", "edgeLabelBackground": "#FFFFFF"}}}%%
+flowchart LR
+    INIT["BSP 初始化<br/>AMOLED / PMU"]:::init
+    INPUT["输入<br/>Touch + IMU"]:::input
+    WIFI["WiFi / TCP<br/>状态同步"]:::wifi
+    CORE["UI Core<br/>动画 + 中文字库"]:::core
+    READY["状态页<br/>10 种动画"]:::page
+    QUOTA["积分页<br/>35,000"]:::quota
+    ALERT["摔倒感知<br/>红色警报"]:::alert
 
-    subgraph P[页面系统]
-        READY[PAGE_READY<br/>10 状态动画循环]:::page
-        QUOTA[PAGE_QUOTA<br/>35000 积分圆环]:::page
-        SHAKE[摔倒感知<br/>红色警报弹窗]:::alert
-        CONNECT[PAGE_CONNECT<br/>WiFi 连接状态]:::page
-    end
-
-    INIT --> ANIM
-    INIT --> FONT
-    ANIM --> UI
-    FONT --> UI
-    TOUCH --> UI
-    IMU --> SHAKE
-    WIFI --> UI
-    UI --> READY
-    UI --> QUOTA
-    UI --> CONNECT
+    INIT --> CORE
+    INPUT --> CORE
+    WIFI --> CORE
+    CORE --> READY
+    CORE --> QUOTA
+    INPUT --> ALERT
 
     classDef init fill:#00B4D8,stroke:#BAE6FD,color:#082F49,stroke-width:2px;
-    classDef touch fill:#10B981,stroke:#A7F3D0,color:#052E16,stroke-width:2px;
-    classDef imu fill:#EAB308,stroke:#FEF3C7,color:#111827,stroke-width:2px;
+    classDef input fill:#10B981,stroke:#A7F3D0,color:#052E16,stroke-width:2px;
     classDef wifi fill:#6366F1,stroke:#E0E7FF,color:#FFFFFF,stroke-width:2px;
-    classDef font fill:#8B5CF6,stroke:#EDE9FE,color:#FFFFFF,stroke-width:2px;
-    classDef anim fill:#32f08c,stroke:#A7F3D0,color:#052E16,stroke-width:2px;
-    classDef ui fill:#2563EB,stroke:#BFDBFE,color:#FFFFFF,stroke-width:3px;
+    classDef core fill:#2563EB,stroke:#BFDBFE,color:#FFFFFF,stroke-width:3px;
     classDef page fill:#14B8A6,stroke:#CCFBF1,color:#042F2E,stroke-width:2px;
+    classDef quota fill:#A855F7,stroke:#F3E8FF,color:#FFFFFF,stroke-width:2px;
     classDef alert fill:#EF4444,stroke:#FECACA,color:#FFFFFF,stroke-width:3px;
 ```
 
@@ -350,27 +306,33 @@ flowchart TB
 ## 10. 家庭感知链路
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#0F172A", "primaryTextColor": "#F8FAFC", "lineColor": "#94A3B8"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#FFFFFF", "primaryColor": "#2563EB", "primaryTextColor": "#0F172A", "primaryBorderColor": "#67E8F9", "secondaryColor": "#7C3AED", "tertiaryColor": "#E0F2FE", "lineColor": "#0284C7", "clusterBkg": "#F8FBFF", "clusterBorder": "#38BDF8", "edgeLabelBackground": "#FFFFFF"}}}%%
 flowchart LR
-    CAM[摄像头采集]:::input --> MOTION[OpenCV 运动检测]:::proc
-    MOTION --> PERSON[人物检测<br/>可插拔模型]:::proc
-    PERSON --> POSE[姿态分析<br/>跌倒时序判定]:::proc
-    POSE --> EVENT[结构化事件<br/>detected]:::event
-    EVENT --> HUB[T.R.A.E.V.I.S. 中台]:::hub
-    HUB -->|信息级| RECORD[事件记录<br/>低打扰]:::out
-    HUB -->|注意级| NOTIFY[轻量提醒<br/>电子吧唧+手机]:::out
-    HUB -->|紧急级| ALERT[红色告警<br/>多端触达]:::alert
-    ALERT --> CONFIRM[用户确认<br/>acknowledged]:::user
-    CONFIRM --> RESOLVE[已处理<br/>resolved]:::out
+    CAM["摄像头"]:::input
+    DETECT["运动 / 人物检测<br/>OpenCV + YOLO"]:::detect
+    POSE["姿态与时序<br/>跌倒判定"]:::pose
+    EVENT["结构化事件<br/>detected"]:::event
+    HUB["T.R.A.E.V.I.S. 中台<br/>事件分级"]:::hub
+    INFO["信息<br/>记录"]:::info
+    NOTICE["注意<br/>轻量提醒"]:::notice
+    ALERT["紧急<br/>多端红色告警"]:::alert
+    USER["用户确认<br/>acknowledged / resolved"]:::user
+
+    CAM --> DETECT --> POSE --> EVENT --> HUB
+    HUB --> INFO
+    HUB --> NOTICE
+    HUB --> ALERT
+    ALERT --> USER
 
     classDef input fill:#38BDF8,stroke:#E0F2FE,color:#082F49,stroke-width:2px;
-    classDef proc fill:#C51A4E,stroke:#FBCFE8,color:#FFFFFF,stroke-width:2px;
-    classDef event fill:#EAB308,stroke:#FEF3C7,color:#111827,stroke-width:2px;
-    classDef hub fill:#32f08c,stroke:#A7F3D0,color:#052E16,stroke-width:3px;
-    classDef out fill:#6366F1,stroke:#E0E7FF,color:#FFFFFF,stroke-width:2px;
+    classDef detect fill:#C51A4E,stroke:#FBCFE8,color:#FFFFFF,stroke-width:2px;
+    classDef pose fill:#EAB308,stroke:#FEF3C7,color:#111827,stroke-width:2px;
+    classDef event fill:#F59E0B,stroke:#FEF3C7,color:#111827,stroke-width:2px;
+    classDef hub fill:#32F08C,stroke:#A7F3D0,color:#052E16,stroke-width:3px;
+    classDef info fill:#6366F1,stroke:#E0E7FF,color:#FFFFFF,stroke-width:2px;
+    classDef notice fill:#A855F7,stroke:#F3E8FF,color:#FFFFFF,stroke-width:2px;
     classDef alert fill:#EF4444,stroke:#FECACA,color:#FFFFFF,stroke-width:3px;
-    classDef user fill:#06B6D4,stroke:#A5F3FC,color:#042F2E,stroke-width:2px;
-    classDef resolve fill:#22C55E,stroke:#DCFCE7,color:#052E16,stroke-width:2px;
+    classDef user fill:#06B6D4,stroke:#CFFAFE,color:#083344,stroke-width:2px;
 ```
 
 家庭感知链路遵循"本地优先、最小上传"原则：原始画面默认留在树莓派本地，只有结构化事件信息同步到中台。
@@ -380,20 +342,19 @@ flowchart LR
 ## 11. 安全与隐私设计
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#030712", "primaryTextColor": "#F9FAFB", "lineColor": "#9CA3AF"}}}%%
-flowchart TB
-    A[统一状态]:::a --> B[所有终端共享同一份状态快照<br/>避免各自维护互相冲突的数据]
-    B --> C[边缘感知]:::b
-    C --> D[家庭节点优先本地处理<br/>原始视频原则上不离开本地]
-    D --> E[人类授权]:::c
-    E --> F[重要查看和执行动作必须用户确认<br/>AI 不越过用户直接行动]
-    F --> G[分层安全]:::d
-    G --> H[TRAE 高层规划<br/>中台权限编排<br/>本地控制器运动保护与急停]
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#FFFFFF", "primaryColor": "#2563EB", "primaryTextColor": "#0F172A", "primaryBorderColor": "#67E8F9", "secondaryColor": "#7C3AED", "tertiaryColor": "#E0F2FE", "lineColor": "#0284C7", "clusterBkg": "#F8FBFF", "clusterBorder": "#38BDF8", "edgeLabelBackground": "#FFFFFF"}}}%%
+flowchart LR
+    S1["统一状态<br/>单一可信快照"]:::s1
+    S2["本地优先<br/>原始音视频不出边缘端"]:::s2
+    S3["用户授权<br/>关键查看与动作需确认"]:::s3
+    S4["分层安全<br/>权限校验 + 白名单 + 急停"]:::s4
 
-    classDef a fill:#32f08c,stroke:#A7F3D0,color:#052E16,stroke-width:3px;
-    classDef b fill:#C51A4E,stroke:#FBCFE8,color:#FFFFFF,stroke-width:2px;
-    classDef c fill:#06B6D4,stroke:#A5F3FC,color:#042F2E,stroke-width:2px;
-    classDef d fill:#EF4444,stroke:#FECACA,color:#FFFFFF,stroke-width:3px;
+    S1 --> S2 --> S3 --> S4
+
+    classDef s1 fill:#32F08C,stroke:#A7F3D0,color:#052E16,stroke-width:3px;
+    classDef s2 fill:#C51A4E,stroke:#FBCFE8,color:#FFFFFF,stroke-width:2px;
+    classDef s3 fill:#06B6D4,stroke:#CFFAFE,color:#083344,stroke-width:2px;
+    classDef s4 fill:#EF4444,stroke:#FECACA,color:#FFFFFF,stroke-width:3px;
 ```
 
 | 原则 | 具体措施 |
